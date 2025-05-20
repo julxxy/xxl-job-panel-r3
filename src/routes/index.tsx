@@ -1,60 +1,89 @@
-import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { lazy } from 'react'
+import { createBrowserRouter, Navigate, RouteObject } from 'react-router-dom'
+import { Spin } from 'antd'
 
 import Layout from '@/components/layout'
-import Dashboard from '@/pages/dashboard/index'
 import LoginPage from '@/pages/login'
-import OverflowTest from '@/pages/extra/OverflowTest'
-import NotFound from '@/pages/error/NotFound.tsx'
-import { isFalse } from '@/common/booleanUtils'
-import ProtectedRoute from '@/routes/ProtectedRoute.tsx'
-import UserComponent from '@/pages/user'
-import ExecutorComponent from '@/pages/executor'
-import TaskManageComponent from '@/pages/task'
-import LogViewerComponent from '@/pages/logger'
+import NotFound from '@/pages/error/NotFound'
+import NoPermission from '@/pages/error/NoPermission'
+import ProtectedRoute from '@/routes/ProtectedRoute'
+import Lazy from '@/components/Lazy'
 
-const URIs = {
-  home: '/',
-  login: '/login',
+export const URIs = {
+  root: '/',
+  auth: {
+    login: '/login',
+    noPermission: '/403',
+  },
+  error: {
+    notFound: '/404',
+  },
   dashboard: '/dashboard',
-  overflow: '/overflow',
   tasks: '/tasks',
   logs: '/logs',
   users: '/users',
   executors: '/executors',
-  notFound: '/404',
-  noPermission: '/403',
+  overflow: '/overflow',
 }
 
-const AppRoutes: React.FC = () => {
-  return (
-    <Routes>
-      <Route path={URIs.login} element={<LoginPage />} />
-
-      <Route
-        path={URIs.home}
-        element={
-          isFalse(import.meta.env.VITE_ENABLE_AUTH) ? (
-            <Layout />
-          ) : (
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          )
-        }
-      >
-        <Route index element={<Dashboard />} />
-        <Route path={URIs.dashboard} element={<Dashboard />} />
-        <Route path={URIs.tasks} element={<TaskManageComponent />} />
-        <Route path={URIs.logs} element={<LogViewerComponent />} />
-        <Route path={URIs.executors} element={<ExecutorComponent />} />
-        <Route path={URIs.users} element={<UserComponent />} />
-        <Route path={URIs.overflow} element={<OverflowTest />} />
-      </Route>
-
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  )
+type IRouteObject = RouteObject & {
+  enableAuth?: boolean
+  children?: IRouteObject[]
 }
 
-export { URIs, AppRoutes }
+export const RouteConstants = {
+  layoutId: 'layout',
+}
+
+const components = {
+  dashboard: <Lazy Render={lazy(() => import('@/pages/dashboard'))} />,
+  tasks: <Lazy Render={lazy(() => import('@/pages/task'))} />,
+  logs: <Lazy Render={lazy(() => import('@/pages/logger'))} />,
+  executors: <Lazy Render={lazy(() => import('@/pages/executor'))} />,
+  users: <Lazy Render={lazy(() => import('@/pages/user'))} />,
+  overflow: <Lazy Render={lazy(() => import('@/pages/extra/OverflowTest'))} />,
+}
+
+function wrapProtectedRoutes(routes: IRouteObject[]): IRouteObject[] {
+  return routes.map(route => {
+    const newRoute: IRouteObject = { ...route }
+
+    if (route.enableAuth && route.element) {
+      newRoute.element = <ProtectedRoute>{route.element}</ProtectedRoute>
+    }
+
+    if (route.children) {
+      newRoute.children = wrapProtectedRoutes(route.children)
+    }
+
+    return newRoute
+  })
+}
+
+const routes: IRouteObject[] = [
+  { path: URIs.root, element: <Navigate to={URIs.dashboard} /> },
+  { path: URIs.auth.login, element: <LoginPage /> },
+  { path: '*', element: <Navigate to={URIs.error.notFound} /> },
+  {
+    id: RouteConstants.layoutId,
+    enableAuth: true,
+    element: <Layout />,
+    hydrateFallbackElement: (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <Spin tip="页面加载中..." size="large" />
+      </div>
+    ),
+    children: [
+      { path: URIs.dashboard, element: components.dashboard },
+      { path: URIs.tasks, element: components.tasks },
+      { path: URIs.logs, element: components.logs },
+      { path: URIs.executors, element: components.executors },
+      { path: URIs.users, element: components.users },
+      { path: URIs.overflow, element: components.overflow },
+    ],
+  },
+  { path: URIs.error.notFound, element: <NotFound /> },
+  { path: URIs.auth.noPermission, element: <NoPermission /> },
+]
+
+export const AppRouter = createBrowserRouter(wrapProtectedRoutes(routes))

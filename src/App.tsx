@@ -1,8 +1,8 @@
 import '@/App.css'
 
 import { ThemeProvider } from '@/components/ThemeProvider.tsx'
-import { BrowserRouter } from 'react-router-dom'
-import { AppRoutes } from '@/routes'
+import { RouterProvider } from 'react-router-dom'
+import { AppRouter } from '@/routes'
 import { Toaster } from 'sonner'
 import { isDebugEnable, log } from '@/common/Logger.ts'
 import { Environment } from '@/types/enum.ts'
@@ -23,20 +23,18 @@ function App() {
   return (
     <ThemeProvider defaultTheme={isDarkEnable ? 'dark' : 'light'} storageKey="vite-ui-theme">
       <Toaster />
-      <BrowserRouter>
-        {/* 尽可能减少 Antd 覆盖范围 */}
-        <ConfigProvider
-          theme={{ ...antdTheme, algorithm: isDarkEnable ? theme.darkAlgorithm : theme.defaultAlgorithm }}
-          locale={Environment.isLocaleCN() ? zhCN : enUS}
-        >
-          <AntdApp>
-            <AntdProvider />
-            <div className="antd-wrapper">
-              <AppRoutes />
-            </div>
-          </AntdApp>
-        </ConfigProvider>
-      </BrowserRouter>
+      {/* 尽可能减少 Antd 覆盖范围 */}
+      <ConfigProvider
+        theme={{ ...antdTheme, algorithm: isDarkEnable ? theme.darkAlgorithm : theme.defaultAlgorithm }}
+        locale={Environment.isLocaleCN() ? zhCN : enUS}
+      >
+        <AntdApp>
+          <AntdProvider />
+          <div className="antd-wrapper">
+            <RouterProvider router={AppRouter} />
+          </div>
+        </AntdApp>
+      </ConfigProvider>
     </ThemeProvider>
   )
 }
