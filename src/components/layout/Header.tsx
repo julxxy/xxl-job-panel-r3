@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb.tsx'
-import { URIs } from '@/routes'
+import URIs from '@/assets/URIs.json'
 import { ToggleTheme } from '@/components/ToggleTheme.tsx'
 import { SidebarTrigger } from '@/components/ui/sidebar.tsx'
 import useZustandStore from '@/stores/useZustandStore.ts'
@@ -41,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({ className, ...props }) => {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink href={URIs.home}>首页</BreadcrumbLink>
+              <BreadcrumbLink href={URIs.root}>首页</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>

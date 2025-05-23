@@ -17,25 +17,14 @@ import {
   EyeOpenIcon,
   GearIcon,
   PlusIcon,
-  ResumeIcon,
   RocketIcon,
-  StopIcon,
   TrashIcon,
 } from '@radix-ui/react-icons'
-import { DeleteIcon, EditIcon, MoreHorizontal } from 'lucide-react'
+import { DeleteIcon, EditIcon, MoreHorizontal, PauseIcon, PlayIcon, ViewIcon } from 'lucide-react'
 import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import TaskModalPrimary from '@/pages/task/TaskModalPrimary.tsx'
-
-// 搜索康框默认值
-const initialValues = {
-  jobGroup: -1,
-  triggerStatus: -1,
-  jobDesc: '',
-  executorHandler: '',
-  author: '',
-}
+import TaskModal, { handleToastMsg } from '@/pages/task/TaskModal.tsx'
 
 /**
  * 任务管理
@@ -45,7 +34,6 @@ export default function TaskManageComponent() {
   const [ids, setIds] = useState<number[]>([])
   const [action, setAction] = useState<IAction>('create')
   const { confirm, dialog } = useConfirmDialog()
-
   const [jobGroupOptions, setJobGroupOptions] = useState<{ label: string; value: number }[]>([
     {
       label: '全部',
@@ -53,10 +41,19 @@ export default function TaskManageComponent() {
     },
   ])
 
+  // 搜索康框默认值
+  const initialValues = {
+    jobGroup: -1,
+    triggerStatus: -1,
+    jobDesc: '',
+    executorHandler: '',
+    author: '',
+  }
+
   const fetchJobGroupOptions = async () => {
     try {
       const { content } = await api.user.getUserGroupPermissions()
-      log.info('用户组权限:', content)
+      log.info('用户组执行器权限:', content)
 
       // 使用 map 返回新的数组
       const options = (content || []).map(({ id, title }) => ({
@@ -116,37 +113,6 @@ export default function TaskManageComponent() {
     },
   ]
 
-  function onStop(id: number) {
-    if (isDebugEnable) log.info('onStop:', id)
-  }
-
-  function onStart(id: number) {
-    if (isDebugEnable) log.info('onStart:', id)
-  }
-
-  function handleRunOnce(id: number) {
-    if (isDebugEnable) log.info('执行一次: ', id)
-  }
-
-  function handleViewLog(id: number) {
-    if (isDebugEnable) log.info('查看日志: ', id)
-  }
-
-  function handleRegisterNode(id: number) {
-    if (isDebugEnable) log.info('注册节点: ', id)
-  }
-
-  function handleClone(record: Job.JobItem) {
-    if (isDebugEnable) log.info('复制数据:', record)
-    const cloned = { ...record, id: undefined, jobDesc: `${record.jobDesc} - 副本` }
-    modalRef?.current.openModal('create', cloned)
-  }
-
-  const handleNextTriggerTime = (record: Job.JobItem) => {
-    if (isDebugEnable) log.info('handleNextTriggerTime:', record)
-    return undefined
-  }
-
   const columns: ColumnsType<Job.JobItem> = [
     { title: '任务ID', dataIndex: 'id', fixed: 'left' },
     { title: '任务描述', dataIndex: 'jobDesc' },
@@ -196,22 +162,90 @@ export default function TaskManageComponent() {
       title: '操作',
       render: (record: Job.JobItem) => (
         <Space>
-          {/* 启停按钮 */}
+          {/* 启动 / 停止 */}
           <IconTooltipButton
-            onClick={() => (record.triggerStatus === 1 ? onStop(record.id) : onStart(record.id))}
             tooltip={record.triggerStatus === 1 ? '停止任务' : '启动任务'}
-            icon={record.triggerStatus === 1 ? <StopIcon /> : <ResumeIcon />}
+            icon={record.triggerStatus === 1 ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
+            onClick={() => (record.triggerStatus === 1 ? onStop(record.id) : onStart(record.id))}
           />
           {/* 执行一次 */}
-          <IconTooltipButton tooltip="执行一次" icon={<RocketIcon />} onClick={() => handleRunOnce(record.id)} />
-          {/* 编辑按钮 */}
-          <IconTooltipButton onClick={() => handleEdit(record)} tooltip="编辑任务" icon={<EditIcon />} />
+          <IconTooltipButton
+            tooltip="执行一次"
+            icon={<RocketIcon />}
+            onClick={() =>
+              handleRunOnce({
+                id: record.id,
+                executorParam: record.executorParam,
+                addressList: '',
+              })
+            }
+          />
+          {/* 编辑 */}
+          <IconTooltipButton tooltip="编辑任务" icon={<EditIcon size={16} />} onClick={() => handleEdit(record)} />
+          {/* 查看 */}
+          <IconTooltipButton
+            tooltip="查看"
+            icon={<ViewIcon size={16} />}
+            onClick={() => modalRef?.current.openModal('view', record)}
+          />
           {/* 更多操作 */}
           <MoreActionsMenu record={record} />
         </Space>
       ),
     },
   ]
+
+  function handleNextTriggerTime(record: Job.JobItem) {
+    if (isDebugEnable) log.info('下次执行时间:', record)
+    // todo
+    return undefined
+  }
+
+  async function onStop(id: number) {
+    if (isDebugEnable) log.info('停止任务:', id)
+    const { code, msg } = await api.job.stopJob(id)
+    handleToastMsg(code, msg)
+    search.reset()
+  }
+
+  async function onStart(id: number) {
+    if (isDebugEnable) log.info('执行任务:', id)
+    const { code, msg } = await api.job.startJob(id)
+    handleToastMsg(code, msg)
+    search.reset()
+  }
+
+  async function handleRunOnce({
+    id,
+    executorParam,
+    addressList,
+  }: {
+    id: number | string
+    executorParam: string
+    addressList: string
+  }) {
+    if (isDebugEnable) log.info('执行一次: ', id, executorParam, addressList)
+    const { code, msg } = await api.job.triggerJob({ id, executorParam, addressList })
+    // todo 弹窗字段补全
+    handleToastMsg(code, msg)
+    search.reset()
+  }
+
+  function handleViewLog(id: number) {
+    if (isDebugEnable) log.info('查看日志: ', id)
+    // todo
+  }
+
+  function handleRegisterNode(id: number) {
+    if (isDebugEnable) log.info('注册节点: ', id)
+    // todo
+  }
+
+  function handleClone(record: Job.JobItem) {
+    if (isDebugEnable) log.info('复制数据:', record)
+    const cloned = { ...record, id: undefined, jobDesc: `${record.jobDesc} - 副本` }
+    modalRef?.current.openModal('create', cloned)
+  }
 
   /**
    * 更多操作
@@ -222,7 +256,6 @@ export default function TaskManageComponent() {
 
     const handleToggleMenu = (newOpen: boolean) => {
       setOpen(newOpen)
-
       if (newOpen) {
         // 只有在打开菜单时才调用
         const result = handleNextTriggerTime(record)
@@ -254,7 +287,7 @@ export default function TaskManageComponent() {
             <ClipboardCopyIcon className="mr-2 h-4 w-4" />
             复制为新任务
           </DropdownMenuItem>
-          <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => handleDelete(record.id)}>
+          <DropdownMenuItem className="text-red-400 focus:text-red-400" onClick={() => handleDelete(record.id)}>
             <DeleteIcon className="mr-2 h-4 w-4" />
             删除任务
           </DropdownMenuItem>
@@ -325,10 +358,11 @@ export default function TaskManageComponent() {
           await Promise.all(ids.map(id => api.job.deleteJob(id)))
           toast.success(`${ids.length > 1 ? '批量删除成功' : '删除成功'}`)
           setIds([])
+          search.reset()
         },
       })
     },
-    [confirm]
+    [confirm, search]
   )
 
   const handleBatchDelete = () => {
@@ -354,13 +388,13 @@ export default function TaskManageComponent() {
         buttons={[
           {
             key: 'addJob',
-            label: '新建',
+            label: '新建任务',
             icon: <PlusIcon />,
-            onClick: () => modalRef?.current.openModal('create'),
+            onClick: () => modalRef?.current.openModal('create', jobGroupOptions),
           },
           {
             key: 'batchDelete',
-            label: ' 批量',
+            label: '批量删除',
             icon: <TrashIcon />,
             onClick: handleBatchDelete,
           },
@@ -385,11 +419,13 @@ export default function TaskManageComponent() {
         />
       </div>
 
-      {/*<TaskModal parentRef={modalRef} onRefresh={() => (action === 'create' ? search.reset() : search.submit())} />*/}
+      <TaskModal parentRef={modalRef} onRefresh={() => (action === 'create' ? search.reset() : search.submit())} />
+      {/*
       <TaskModalPrimary
         parentRef={modalRef}
         onRefresh={() => (action === 'create' ? search.reset() : search.submit())}
       />
+      */}
 
       {dialog}
     </div>

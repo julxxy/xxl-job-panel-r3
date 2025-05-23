@@ -76,10 +76,17 @@ Write-Host "分片总数: " $args[$args.Count - 1]
 Write-Host "Good bye!"
 exit 0`,
 
-  [GlueTypeEnum.GLUE_GROOVY]: `class Handler {
-    def execute() {
-        println("Hello from Groovy")
+  [GlueTypeEnum.GLUE_GROOVY]: `package com.xxl.job.service.handler;
+
+import com.xxl.job.core.context.XxlJobHelper;
+import com.xxl.job.core.handler.IJobHandler;
+
+public class JobHandlerExample extends IJobHandler {
+
+    @Override
+    public void execute() throws Exception {
+        XxlJobHelper.log("Hello from Groovy");
     }
-}
-new Handler().execute()`,
+
+}`,
 }

@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react'
-import { Checkbox, Col, Row, Select } from 'antd'
+import { Checkbox, Col, Radio, Row, Select } from 'antd'
 import { CloseOutlined } from '@ant-design/icons'
 import { Button } from '@/components/ui/button.tsx'
-import { log } from '@/common/Logger.ts'
+import { isDebugEnable, log } from '@/common/Logger.ts'
 import { ResetIcon } from '@radix-ui/react-icons'
 
 export interface OptionType {
@@ -17,6 +17,7 @@ export interface ISelectWithCheckboxProps<T extends Record<string, any> = Option
   placeholder?: string
   labelKey?: keyof T
   valueKey?: keyof T
+  mode?: 'single' | 'multiple'
 }
 
 /**
@@ -60,12 +61,12 @@ export default function SelectWithCheckbox<T extends Record<string, any> = Optio
   placeholder = '请选择',
   labelKey = 'label',
   valueKey = 'value',
+  mode = 'multiple',
 }: ISelectWithCheckboxProps<T>) {
-  log.info('SelectWithCheckbox', JSON.stringify(value))
+  if (isDebugEnable) log.info('SelectWithCheckbox: ', JSON.stringify(value))
   const [open, setOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
 
-  // 筛选项（自定义搜索逻辑）
   const filteredOptions = useMemo(() => {
     return options.filter(opt =>
       String(opt[labelKey] ?? '')
@@ -74,16 +75,20 @@ export default function SelectWithCheckbox<T extends Record<string, any> = Optio
     )
   }, [searchTerm, options, labelKey])
 
-  const updateValue = (newValue: T[keyof T][]) => {
-    onChange?.(newValue as T['value'][])
-  }
-
-  const handleSelectAll = () => {
-    updateValue(filteredOptions.map(opt => opt[valueKey]) as T['value'][])
+  const updateValue = (newValue: T['value'][]) => {
+    if (mode === 'single') {
+      onChange?.(newValue.slice(0, 1)) // 单选只保留一个
+    } else {
+      onChange?.(newValue)
+    }
   }
 
   const handleClearAll = () => {
     updateValue([])
+  }
+
+  const handleSelectAll = () => {
+    updateValue(filteredOptions.map(opt => opt[valueKey]) as T['value'][])
   }
 
   // 自定义下拉内容（含复选框）
@@ -102,46 +107,57 @@ export default function SelectWithCheckbox<T extends Record<string, any> = Optio
           boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <div style={{ fontSize: 14, color: '#888' }}>
-            <Checkbox
-              style={{ fontSize: 16, fontWeight: 500, marginRight: 4 }}
-              indeterminate={isIndeterminate}
-              checked={allSelected}
-              onChange={e => {
-                if (e.target.checked) {
-                  handleSelectAll()
-                } else {
-                  handleClearAll()
-                }
-              }}
-            >
-              全选
-            </Checkbox>
-            已选择 {value.length} 项 / 共 {options.length} 项
+        {mode === 'multiple' && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={{ fontSize: 14, color: '#888' }}>
+              <Checkbox
+                style={{ fontSize: 16, fontWeight: 500, marginRight: 4 }}
+                indeterminate={isIndeterminate}
+                checked={allSelected}
+                onChange={e => {
+                  if (e.target.checked) handleSelectAll()
+                  else handleClearAll()
+                }}
+              >
+                全选
+              </Checkbox>
+              已选择 {value.length} 项 / 共 {options.length} 项
+            </div>
+            <Button size="sm" variant="outline" style={{ marginRight: 4 }} onClick={handleClearAll}>
+              <ResetIcon />
+              清空选择
+            </Button>
           </div>
-          <Button size="sm" variant="outline" style={{ marginRight: 4 }} onClick={handleClearAll}>
-            <ResetIcon />
-            清空选择
-          </Button>
-        </div>
+        )}
 
-        <Checkbox.Group value={value} onChange={updateValue}>
-          <Row gutter={[8, 8]}>
-            {filteredOptions.map(item => (
-              <Col span={6} key={String(item[valueKey])}>
-                <Checkbox value={item[valueKey]}>{item[labelKey] as string}</Checkbox>
-              </Col>
-            ))}
-          </Row>
-        </Checkbox.Group>
+        {mode === 'multiple' ? (
+          <Checkbox.Group value={value} onChange={updateValue}>
+            <Row gutter={[8, 8]}>
+              {filteredOptions.map(item => (
+                <Col span={6} key={String(item[valueKey])}>
+                  <Checkbox value={item[valueKey]}>{item[labelKey] as string}</Checkbox>
+                </Col>
+              ))}
+            </Row>
+          </Checkbox.Group>
+        ) : (
+          <Radio.Group value={value[0] ?? null} onChange={e => updateValue([e.target.value])} style={{ width: '100%' }}>
+            <Row gutter={[8, 8]}>
+              {filteredOptions.map(item => (
+                <Col span={6} key={String(item[valueKey])}>
+                  <Radio value={item[valueKey]}>{item[labelKey] as string}</Radio>
+                </Col>
+              ))}
+            </Row>
+          </Radio.Group>
+        )}
       </div>
     )
   }
 
   return (
     <Select
-      mode="multiple"
+      mode={mode === 'multiple' ? 'multiple' : undefined}
       value={value}
       open={open}
       onOpenChange={setOpen}
@@ -151,6 +167,7 @@ export default function SelectWithCheckbox<T extends Record<string, any> = Optio
       onSearch={setSearchTerm}
       filterOption={false}
       tagRender={({ value: tagValue }) => {
+        if (mode === 'single') return <></>
         const currentItem = options.find(opt => opt[valueKey] === tagValue)
         if (!currentItem) return <span />
 

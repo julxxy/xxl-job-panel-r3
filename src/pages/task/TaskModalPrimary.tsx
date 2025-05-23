@@ -12,7 +12,19 @@ import useZustandStore from '@/stores/useZustandStore.ts'
 import Editor from '@monaco-editor/react'
 import ShadTabsExample from '@/pages/task/children/ShadTabsExample.tsx'
 
-const title = '任务'
+function getTitleText(action: IAction) {
+  const title = '任务'
+  if (action === 'create') {
+    return `新建${title}`
+  }
+  if (action === 'edit') {
+    return `编辑${title}`
+  }
+  if (action === 'view') {
+    return `${title}详情`
+  }
+  return undefined
+}
 
 interface ScheduleFormProps {
   scheduleType: ScheduleTypeEnum
@@ -297,10 +309,11 @@ const TaskModalPrimary = ({ parentRef, onRefresh }: IModalProps) => {
       data={jobInfo}
       style={{ top: 30 }}
       styles={{ body: { maxHeight: '70vh', minHeight: 400, overflowY: 'auto' } }}
+      action={action}
       destroyOnHidden={true}
       title={
         <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-          <span>{action === 'edit' ? '编辑' + title : '新建' + title}</span>
+          <span>{getTitleText(action)}</span>
           <Button type="text" className={'mr-4'} icon={<SwapOutlined />} onClick={() => setUseTabs(!useTabs)}>
             {useTabs ? '切换为折叠布局' : '切换为标签页布局'}
           </Button>

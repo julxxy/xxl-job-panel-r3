@@ -3,7 +3,7 @@ import storage from '@/utils/storage.ts'
 import { isDebugEnable, log } from '@/common/Logger.ts'
 
 import { IRequestConfig } from '@/types/axios-conf'
-import { URIs } from '@/routes'
+import URIs from '@/assets/URIs.json'
 import { toast } from 'sonner'
 import { objectUtils } from '@/common/objectUtils.ts'
 
@@ -73,7 +73,6 @@ axiosClient.interceptors.response.use(
 )
 
 function handleError(_msg: string, data: any) {
-  // toast.error(_msg || '请求出错')
   toast('出错了', {
     description: _msg || '未知错误',
     action: {
@@ -88,7 +87,7 @@ function handleError(_msg: string, data: any) {
 function handleSessionExpired(_msg: string, data: any) {
   toast.error(_msg || '请求出错')
   storage.remove('token')
-  location.href = `${URIs.login}?callback=${encodeURIComponent(location.href)}`
+  location.href = `${URIs.auth.login}?callback=${encodeURIComponent(location.href)}`
   return Promise.reject(data)
 }
 

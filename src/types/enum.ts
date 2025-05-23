@@ -68,7 +68,7 @@ export const GlueTypeConfig: Record<
     suffix: null,
   },
   [GlueTypeEnum.GLUE_GROOVY]: {
-    desc: 'GLUE(Groovy/Java)',
+    desc: 'GLUE(Java)',
     isScript: true,
     cmd: 'groovy',
     suffix: '.groovy',

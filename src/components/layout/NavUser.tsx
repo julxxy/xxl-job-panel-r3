@@ -20,7 +20,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/c
 import api from '@/api'
 import storage from '@/utils/storage.ts'
 import { toast } from '@/utils/toast.ts'
-import { URIs } from '@/routes'
+import URIs from '@/assets/URIs.json'
 
 export function NavUser({
   user,
@@ -43,7 +43,7 @@ export function NavUser({
       toast.success('登出成功')
       storage.clear()
       setTimeout(() => {
-        location.href = URIs.login
+        location.href = URIs.auth.login
       }, 1000)
     }
   }
@@ -56,7 +56,7 @@ export function NavUser({
         toast.success('修改成功，请重新登录')
         setOpenPwdDialog(false)
         setTimeout(() => {
-          location.href = URIs.login
+          location.href = URIs.auth.login
         }, 1000)
       } else {
         toast.error(msg)

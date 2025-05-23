@@ -17,7 +17,7 @@ import useZustandStore from '@/stores/useZustandStore'
 import { log } from '@/common/Logger'
 import { NavSidebarGroupItem, NavyPrimary } from '@/components/layout/NavyPrimary.tsx'
 import { useNavigate } from 'react-router-dom'
-import { URIs } from '@/routes'
+import URIs from '@/assets/URIs.json'
 import { navMainItems } from '@/config/menu.config.ts'
 
 export function Sidebar({ ...props }: React.ComponentProps<typeof ShadUISidebar>) {
@@ -39,7 +39,7 @@ export function Sidebar({ ...props }: React.ComponentProps<typeof ShadUISidebar>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href={URIs.home}>
+              <a href={URIs.root}>
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Clock className="size-4" />
                 </div>

@@ -8,23 +8,7 @@ import NotFound from '@/pages/error/NotFound'
 import NoPermission from '@/pages/error/NoPermission'
 import ProtectedRoute from '@/routes/ProtectedRoute'
 import Lazy from '@/components/Lazy'
-
-export const URIs = {
-  root: '/',
-  auth: {
-    login: '/login',
-    noPermission: '/403',
-  },
-  error: {
-    notFound: '/404',
-  },
-  dashboard: '/dashboard',
-  tasks: '/tasks',
-  logs: '/logs',
-  users: '/users',
-  executors: '/executors',
-  overflow: '/overflow',
-}
+import URIs from '@/assets/URIs.json'
 
 type IRouteObject = RouteObject & {
   enableAuth?: boolean

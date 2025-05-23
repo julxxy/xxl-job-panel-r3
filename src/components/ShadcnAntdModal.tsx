@@ -21,6 +21,7 @@ interface ShadModalProps<T = any> {
   className?: string
   style?: CSSProperties
   styles?: ModalStyles
+  action?: 'create' | 'edit' | 'view'
   destroyOnHidden?: boolean // 注意：保留 destroy，会配合 useEffect 延迟设置字段
   children: (data?: T) => React.ReactNode
 }
@@ -42,6 +43,7 @@ export function ShadcnAntdModal<T = any>({
   className,
   style,
   styles,
+  action = 'create',
   destroyOnHidden = true,
   children,
 }: ShadModalProps<T>) {
@@ -51,19 +53,23 @@ export function ShadcnAntdModal<T = any>({
   const renderDefaultFooter = () => (
     <div className={clsx('flex justify-end gap-2', footerPadding)}>
       {/* 取消按钮 */}
-      <Button size="sm" variant="outline" onClick={onCancel} disabled={loading}>
-        {cancelText}
-      </Button>
+      {(action === 'create' || action === 'edit') && (
+        <Button size="sm" variant="outline" onClick={onCancel} disabled={loading}>
+          {cancelText}
+        </Button>
+      )}
       {/* 重置按钮（可选） */}
-      {onReset && (
+      {onReset && (action === 'create' || action === 'edit') && (
         <Button size="sm" variant="ghost" onClick={onReset} disabled={loading}>
           {resetText}
         </Button>
       )}
       {/* 确认按钮 */}
-      <Button size="sm" onClick={onOk} disabled={loading}>
-        {loading ? '处理中...' : okText}
-      </Button>
+      {(action === 'create' || action === 'edit') && (
+        <Button size="sm" onClick={onOk} disabled={loading}>
+          {loading ? '处理中...' : okText}
+        </Button>
+      )}
     </div>
   )
 

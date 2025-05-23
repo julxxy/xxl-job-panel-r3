@@ -9,14 +9,42 @@ import { ExecutorRouteStrategyI18n, glueLangMap, GlueTypeConfig, GlueTypeEnum, S
 import Editor from '@monaco-editor/react'
 import { glueTemplates } from '@/constants/glueTemplates.ts'
 import useZustandStore from '@/stores/useZustandStore.ts'
+import api from '@/api'
+import { toast } from '@/utils/toast.ts'
+import SelectWithCheckbox from '@/components/SelectWithCheckbox.tsx'
 
-const title = '任务'
+function getTitleText(action: IAction) {
+  const title = '任务'
+  if (action === 'create') {
+    return `新建${title}`
+  }
+  if (action === 'edit') {
+    return `编辑${title}`
+  }
+  if (action === 'view') {
+    return `${title}详情`
+  }
+  return undefined
+}
 
+// eslint-disable-next-line react-refresh/only-export-components
+export function handleToastMsg(code: number, msg: string) {
+  if (code !== 200) {
+    toast.error(msg)
+  } else {
+    toast.success('SUCCESS')
+  }
+}
+
+/**
+ * 任务弹窗
+ */
 export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
   const [form] = Form.useForm()
   const [open, setOpen] = useState(false)
   const [action, setAction] = useState<IAction>('create')
   const [jobInfo, setJobInfo] = useState<Job.JobItem>({} as Job.JobItem)
+  const [jobGroupOptions, setJobGroupOptions] = useState<{ label: string; value: number }[]>([])
   const [editorCode, setEditorCode] = useState('')
   const { isDarkEnable } = useZustandStore()
   const monacoTheme = isDarkEnable ? 'vs-dark' : 'vs'
@@ -37,9 +65,51 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
   const openModal = (action: IAction, data?: Job.JobItem) => {
     if (isDebugEnable) log.info('弹窗开启: ', action, data)
     setAction(action)
-    setJobInfo(data || ({} as Job.JobItem)) // 保存数据用于延迟设值
-    setOpen(true)
     form.resetFields() // 先重置，避免残留
+    if (action === 'edit' || action === 'view') {
+      // 保存数据用于延迟设值
+      setJobInfo(data || ({} as Job.JobItem))
+    }
+    if (action === 'create') {
+      setJobGroupOptions(data as unknown as { label: string; value: number }[])
+    }
+    setOpen(true)
+  }
+
+  function handleCancel() {
+    if (isDebugEnable) log.info('取消编辑')
+    setOpen(false)
+  }
+
+  async function handleOk() {
+    const fieldsValue = form.getFieldsValue()
+    log.info(`操作: ${action} :`, fieldsValue)
+
+    async function handleCreate(values: any) {
+      if (isDebugEnable) log.info(`handle-create: ${values} :`, fieldsValue)
+      const { code, msg } = await api.job.addJob(values)
+      handleToastMsg(code, msg)
+    }
+
+    async function handleEdit(values: any) {
+      if (isDebugEnable) log.info(`handle-edit: ${values} :`, fieldsValue)
+      const { code, msg } = await api.job.editJob(values)
+      handleToastMsg(code, msg)
+    }
+
+    if (action === 'create') {
+      await handleCreate(fieldsValue)
+    } else {
+      await handleEdit(fieldsValue)
+    }
+
+    setOpen(false)
+    onRefresh()
+  }
+
+  function handleReset() {
+    setJobInfo({} as Job.JobItem)
+    form.resetFields()
   }
 
   // 延迟设置字段，确保 Form 已挂载
@@ -50,38 +120,6 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
       }, 10)
     }
   }, [open, action, jobInfo, form])
-
-  const handleCancel = () => {
-    if (isDebugEnable) log.info('取消编辑')
-    setOpen(false)
-  }
-
-  const handleOk = () => {
-    const fieldsValue = form.getFieldsValue()
-    log.info(`操作: ${action} :`, fieldsValue)
-
-    if (action === 'create') {
-      handleCreate(fieldsValue)
-    } else {
-      handleEdit(fieldsValue)
-    }
-
-    setOpen(false)
-    onRefresh()
-
-    function handleCreate(values: any) {
-      if (isDebugEnable) log.info(`handle-create: ${values} :`, fieldsValue)
-    }
-
-    function handleEdit(values: any) {
-      if (isDebugEnable) log.info(`handle-edit: ${values} :`, fieldsValue)
-    }
-  }
-
-  function handleReset() {
-    setJobInfo({} as Job.JobItem)
-    form.resetFields()
-  }
 
   // 动态渲染
   useEffect(() => {
@@ -103,13 +141,16 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
 
   return (
     <ShadcnAntdModal<Job.JobItem>
+      title={getTitleText(action)}
       width={900}
+      data={jobInfo}
       open={open}
       onCancel={handleCancel}
       onOk={handleOk}
       onReset={action === 'create' ? () => handleReset() : undefined}
-      title={action === 'edit' ? '编辑' + title : '新建' + title}
-      data={jobInfo}
+      action={action}
+      style={{ top: 30 }}
+      styles={{ body: { maxHeight: '70vh', minHeight: 400, overflowY: 'auto' } }}
       destroyOnHidden={true}
     >
       {() => (
@@ -122,8 +163,14 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
           <Card title="基础配置" variant="outlined" style={{ marginBottom: 12 }}>
             <Row gutter={16}>
               <Col span={12}>
-                <Form.Item label="执行器" name="jobGroup" rules={[{ required: true }]}>
-                  <Select placeholder="请选择执行器" options={[]} />
+                <Form.Item name="jobGroup" label="执行器" rules={[{ required: true, message: '请选择至少一项' }]}>
+                  <SelectWithCheckbox<{ label: string; value: number }>
+                    mode="single"
+                    placeholder="请选择执行器/搜索执行器"
+                    options={jobGroupOptions}
+                    labelKey="label"
+                    valueKey="value"
+                  />
                 </Form.Item>
               </Col>
               <Col span={12}>

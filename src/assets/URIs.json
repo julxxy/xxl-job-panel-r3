@@ -1,0 +1,16 @@
+{
+  "root": "/",
+  "auth": {
+    "login": "/login",
+    "noPermission": "/403"
+  },
+  "error": {
+    "notFound": "/404"
+  },
+  "dashboard": "/dashboard",
+  "tasks": "/tasks",
+  "logs": "/logs",
+  "users": "/users",
+  "executors": "/executors",
+  "overflow": "/overflow"
+}
