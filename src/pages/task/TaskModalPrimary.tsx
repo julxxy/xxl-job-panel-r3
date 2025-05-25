@@ -65,18 +65,23 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
 
   const openModal = (action: IAction, data?: Job.JobItem) => {
     if (isDebugEnable) log.info('弹窗开启: ', action, data)
-    setAction(action)
-    form.resetFields() // 先重置，避免残留
-    if (action === 'edit' || action === 'view') {
-      // 保存数据用于延迟设值
-      setJobInfo(data || ({} as Job.JobItem))
-      setDisabled(action === 'view')
-    }
-    if (action === 'create') {
-      setJobInfo(data || ({} as Job.JobItem))
-      setJobGroupOptions(data?._jobGroupOptions ?? [])
-    }
+    // 重置表单并设置基础状态
+    form.resetFields()
     setOpen(true)
+    setAction(action)
+    setDisabled(action === 'view')
+
+    // 处理权限组选项
+    setJobGroupOptions(data?._jobGroupOptions ?? [])
+
+    // 智能设置表单数据
+    const initialData = data || ({} as Job.JobItem)
+    setJobInfo(initialData)
+
+    // 编辑/查看模式的特殊处理
+    if (action === 'edit' || action === 'view') {
+      form.setFieldsValue(initialData) // 立即填充表单数据
+    }
   }
 
   function handleCancel() {
@@ -166,7 +171,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
           <Card title="基础配置" variant="outlined" style={{ marginBottom: 12 }}>
             <Row gutter={16}>
               <Col span={12}>
-                <Form.Item name="jobGroup" label="执行器" rules={[{ required: true, message: '请选择至少一项' }]}>
+                <Form.Item label="执行器" name="jobGroup" rules={[{ required: true, message: '请选择至少一项' }]}>
                   <SelectWithCheckbox<{ label: string; value: number }>
                     mode="single"
                     placeholder="请选择执行器/搜索执行器"
