@@ -149,7 +149,7 @@ export default function UserComponent() {
         buttons={[
           {
             key: 'addJob',
-            label: '新建',
+            label: '新建用户',
             icon: <PlusIcon />,
             onClick: handleCreate,
           },

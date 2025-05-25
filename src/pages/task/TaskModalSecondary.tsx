@@ -10,7 +10,7 @@ import CronEditor from '@/pages/cron/CronEditor.tsx'
 import { FormInstance } from 'rc-field-form/es/interface'
 import useZustandStore from '@/stores/useZustandStore.ts'
 import Editor from '@monaco-editor/react'
-import ShadTabsExample from '@/pages/task/children/ShadTabsExample.tsx'
+import ShadTabsExample from '@/components/ShadTabsExample.tsx'
 
 function getTitleText(action: IAction) {
   const title = '任务'
@@ -35,7 +35,10 @@ interface TaskFormProps {
   form: FormInstance
 }
 
-const TaskModalSecondary = ({ parentRef, onRefresh }: IModalProps) => {
+/**
+ * TaskModalSecondary
+ */
+export default function TaskModalSecondary({ parentRef, onRefresh }: IModalProps) {
   const [form] = Form.useForm()
   const [open, setOpen] = useState(false)
   const [action, setAction] = useState<IAction>('create')
@@ -328,5 +331,3 @@ const TaskModalSecondary = ({ parentRef, onRefresh }: IModalProps) => {
     </ShadcnAntdModal>
   )
 }
-
-export default TaskModalSecondary
