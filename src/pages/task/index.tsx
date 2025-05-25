@@ -342,6 +342,7 @@ export default function TaskManageComponent() {
   }
 
   function handleEdit(record: Job.JobItem) {
+    record._jobGroupOptions = jobGroupOptions
     modalRef?.current.openModal('edit', record)
   }
 
