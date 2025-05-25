@@ -91,6 +91,7 @@ export namespace Job {
     triggerStatus: number
     updateTime: string
     triggerNextTime: number
+    _jobGroupOptions: any[]
   }
 
   export interface JobGroupInfo {

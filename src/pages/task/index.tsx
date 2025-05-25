@@ -24,7 +24,7 @@ import { DeleteIcon, EditIcon, MoreHorizontal, PauseIcon, PlayIcon, ViewIcon } f
 import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import TaskModal, { handleToastMsg } from '@/pages/task/TaskModal.tsx'
+import TaskModalPrimary, { handleToastMsg } from '@/pages/task/TaskModalPrimary'
 
 /**
  * 任务管理
@@ -244,6 +244,7 @@ export default function TaskManageComponent() {
   function handleClone(record: Job.JobItem) {
     if (isDebugEnable) log.info('复制数据:', record)
     const cloned = { ...record, id: undefined, jobDesc: `${record.jobDesc} - 副本` }
+    cloned._jobGroupOptions = jobGroupOptions
     modalRef?.current.openModal('create', cloned)
   }
 
@@ -419,13 +420,10 @@ export default function TaskManageComponent() {
         />
       </div>
 
-      <TaskModal parentRef={modalRef} onRefresh={() => (action === 'create' ? search.reset() : search.submit())} />
-      {/*
       <TaskModalPrimary
         parentRef={modalRef}
         onRefresh={() => (action === 'create' ? search.reset() : search.submit())}
       />
-      */}
 
       {dialog}
     </div>
