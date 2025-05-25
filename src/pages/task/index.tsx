@@ -25,6 +25,7 @@ import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import TaskModalPrimary, { handleToastMsg } from '@/pages/task/TaskModalPrimary'
+import dayjs from 'dayjs'
 
 /**
  * 任务管理
@@ -34,6 +35,7 @@ export default function TaskManageComponent() {
   const [ids, setIds] = useState<number[]>([])
   const [action, setAction] = useState<IAction>('create')
   const { confirm, dialog } = useConfirmDialog()
+  const [jobGroupMap, setJobGroupMap] = useState<Map<number, string>>(new Map())
   const [jobGroupOptions, setJobGroupOptions] = useState<{ label: string; value: number }[]>([
     {
       label: '全部',
@@ -61,8 +63,9 @@ export default function TaskManageComponent() {
         value: id,
       }))
 
-      // 更新状态
-      setJobGroupOptions(options)
+      const sortedOptions = [...options].sort((a, b) => a.value - b.value)
+      setJobGroupOptions(sortedOptions)
+      setJobGroupMap(new Map(sortedOptions.map(item => [item.value, item.label])))
     } catch (error) {
       if (isDebugEnable) log.error('获取用户组权限失败:', error)
     }
@@ -114,8 +117,15 @@ export default function TaskManageComponent() {
   ]
 
   const columns: ColumnsType<Job.JobItem> = [
-    { title: '任务ID', dataIndex: 'id', fixed: 'left' },
+    { title: 'ID', dataIndex: 'id', fixed: 'left' },
     { title: '任务描述', dataIndex: 'jobDesc' },
+    {
+      title: '执行器',
+      dataIndex: 'jobGroup',
+      render: (_: any, record: Job.JobItem) => {
+        return jobGroupMap.get(Number(record.jobGroup)) ?? '未知'
+      },
+    },
     {
       title: '调度类型',
       render: (record: Job.JobItem) => {
@@ -183,11 +193,7 @@ export default function TaskManageComponent() {
           {/* 编辑 */}
           <IconTooltipButton tooltip="编辑任务" icon={<EditIcon size={16} />} onClick={() => handleEdit(record)} />
           {/* 查看 */}
-          <IconTooltipButton
-            tooltip="查看"
-            icon={<ViewIcon size={16} />}
-            onClick={() => modalRef?.current.openModal('view', record)}
-          />
+          <IconTooltipButton tooltip="查看" icon={<ViewIcon size={16} />} onClick={handleViewItem(record)} />
           {/* 更多操作 */}
           <MoreActionsMenu record={record} />
         </Space>
@@ -195,10 +201,14 @@ export default function TaskManageComponent() {
     },
   ]
 
-  function handleNextTriggerTime(record: Job.JobItem) {
+  async function handleNextTriggerTime(record: Job.JobItem) {
     if (isDebugEnable) log.info('下次执行时间:', record)
-    // todo
-    return undefined
+    const { code, content } = await api.job.nextTriggerTime({
+      scheduleConf: record.scheduleConf,
+      scheduleType: record.scheduleType,
+    })
+    if (isDebugEnable) log.info('具体执行时间:', content)
+    return code === 200 && content ? dayjs(content[0]).format('YYYY/MM/DD HH:mm:ss') : 'N/A'
   }
 
   async function onStop(id: number) {
@@ -216,10 +226,10 @@ export default function TaskManageComponent() {
   }
 
   async function handleRunOnce({
-    id,
-    executorParam,
-    addressList,
-  }: {
+                                 id,
+                                 executorParam,
+                                 addressList,
+                               }: {
     id: number | string
     executorParam: string
     addressList: string
@@ -229,6 +239,13 @@ export default function TaskManageComponent() {
     // todo 弹窗字段补全
     handleToastMsg(code, msg)
     search.reset()
+  }
+
+  function handleViewItem(record: Job.JobItem) {
+    return () => {
+      record._jobGroupOptions = jobGroupOptions
+      modalRef?.current.openModal('view', record)
+    }
   }
 
   function handleViewLog(id: number) {
@@ -254,13 +271,22 @@ export default function TaskManageComponent() {
   function MoreActionsMenu({ record }: { record: Job.JobItem }) {
     const [open, setOpen] = useState(false)
     const [nextTriggerTime, setNextTriggerTime] = useState<string | undefined>('N/A')
+    // 使用 ref 缓存结果，避免重复请求
+    const triggerTimeCache = useRef<Map<number, string>>(new Map())
 
-    const handleToggleMenu = (newOpen: boolean) => {
+    const handleToggleMenu = async (newOpen: boolean) => {
       setOpen(newOpen)
+      // 只有在打开菜单时才调用
       if (newOpen) {
-        // 只有在打开菜单时才调用
-        const result = handleNextTriggerTime(record)
-        setNextTriggerTime(result ?? 'N/A')
+        // 只有在未缓存时才请求
+        if (!triggerTimeCache.current.has(record.id)) {
+          const result = await handleNextTriggerTime(record)
+          const timeStr = result ?? 'N/A'
+          triggerTimeCache.current.set(record.id, timeStr)
+          setNextTriggerTime(timeStr)
+        } else {
+          setNextTriggerTime(triggerTimeCache.current.get(record.id)!)
+        }
       }
     }
 
@@ -299,7 +325,7 @@ export default function TaskManageComponent() {
 
   const fetchData = async (
     { current, pageSize }: { current: number; pageSize: number },
-    formData: Job.PageListParams
+    formData: Job.PageListParams,
   ) => {
     try {
       const res = await api.job.getJobInfoList({
@@ -364,7 +390,7 @@ export default function TaskManageComponent() {
         },
       })
     },
-    [confirm, search]
+    [confirm, search],
   )
 
   const handleBatchDelete = () => {

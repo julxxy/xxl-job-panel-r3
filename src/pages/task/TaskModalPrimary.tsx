@@ -2,7 +2,7 @@ import { IAction, IModalProps } from '@/types/modal.ts'
 import { Job } from '@/types'
 import { ShadcnAntdModal } from '@/components/ShadcnAntdModal.tsx'
 import { isDebugEnable, log } from '@/common/Logger.ts'
-import { useEffect, useImperativeHandle, useState } from 'react'
+import { useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Card, Col, Form, Input, Row, Select } from 'antd'
 import CronEditor from '@/pages/cron/CronEditor.tsx'
 import { ExecutorRouteStrategyI18n, glueLangMap, GlueTypeConfig, GlueTypeEnum, ScheduleTypeEnum } from '@/types/enum.ts'
@@ -11,7 +11,6 @@ import { glueTemplates } from '@/constants/glueTemplates.ts'
 import useZustandStore from '@/stores/useZustandStore.ts'
 import api from '@/api'
 import { toast } from '@/utils/toast.ts'
-import SelectWithCheckbox from '@/components/SelectWithCheckbox.tsx'
 
 function getTitleText(action: IAction) {
   const title = '任务'
@@ -47,11 +46,12 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
   const [jobInfo, setJobInfo] = useState<Job.JobItem>({} as Job.JobItem)
   const [jobGroupOptions, setJobGroupOptions] = useState<{ label: string; value: number }[]>([])
   const [editorCode, setEditorCode] = useState('')
+  const formRef = useRef(form)
   const { isDarkEnable } = useZustandStore()
   const monacoTheme = isDarkEnable ? 'vs-dark' : 'vs'
+  const scheduleType = Form.useWatch('scheduleType', form) as ScheduleTypeEnum
   const glueType = Form.useWatch('glueType', form) as GlueTypeEnum
   const showJobHandler = glueType === GlueTypeEnum.BEAN
-  const scheduleType = Form.useWatch('scheduleType', form) as ScheduleTypeEnum
   const glueTypeOptions = Object.entries(GlueTypeConfig).map(([value, config]) => ({
     label: config.desc, // GLUE(Python)
     value: value as GlueTypeEnum,
@@ -72,7 +72,8 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
     setDisabled(action === 'view')
 
     // 处理权限组选项
-    setJobGroupOptions(data?._jobGroupOptions ?? [])
+    const actualJobGroupOptions = Array.isArray(data) ? data : (data?._jobGroupOptions ?? [])
+    setJobGroupOptions(actualJobGroupOptions)
 
     // 智能设置表单数据
     const initialData = data || ({} as Job.JobItem)
@@ -122,7 +123,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
 
   // 延迟设置字段，确保 Form 已挂载
   useEffect(() => {
-    if (open) {
+    if ((action === 'edit' || action === 'view') && open && jobInfo && Object.keys(jobInfo).length > 0) {
       setTimeout(() => {
         form.setFieldsValue(jobInfo)
       }, 10)
@@ -132,9 +133,9 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
   // 动态渲染
   useEffect(() => {
     if (!showJobHandler) {
-      form.setFieldValue('executorHandler', '') // 清空值
+      formRef.current.setFieldValue('executorHandler', '')
     }
-  }, [showJobHandler, form])
+  }, [showJobHandler])
 
   useEffect(() => {
     if (glueType && GlueTypeConfig[glueType]?.isScript) {
@@ -172,12 +173,18 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
             <Row gutter={16}>
               <Col span={12}>
                 <Form.Item label="执行器" name="jobGroup" rules={[{ required: true, message: '请选择至少一项' }]}>
-                  <SelectWithCheckbox<{ label: string; value: number }>
-                    mode="single"
-                    placeholder="请选择执行器/搜索执行器"
+                  <Select
+                    allowClear
+                    showSearch={jobGroupOptions.length > 10}
                     options={jobGroupOptions ?? []}
-                    labelKey="label"
-                    valueKey="value"
+                    placeholder="请选择执行器/搜索执行器"
+                    optionFilterProp="label"
+                    filterOption={(input, option) => {
+                      const label = option?.label?.toString()?.toLowerCase() || ''
+                      const value = option?.value?.toString()?.toLowerCase() || ''
+                      const keyword = input.toLowerCase()
+                      return label.includes(keyword) || value.includes(keyword)
+                    }}
                   />
                 </Form.Item>
               </Col>
@@ -278,7 +285,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
                   <Form.Item label="脚本内容" name="glueSource" rules={[{ required: true, message: '请输入脚本内容' }]}>
                     <div className="border rounded-md overflow-hidden dark:border-zinc-800">
                       <Editor
-                        height="200px"
+                        height={160}
                         language={glueLangMap[glueType] || 'text'}
                         value={editorCode}
                         onChange={val => {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx'
 import FloatingInput from '@/components/FloatingInput'
 import { Button } from 'antd'
 import styles from '@/components/FloatingInput/index.module.css'
