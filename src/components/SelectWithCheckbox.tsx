@@ -57,7 +57,7 @@ export interface ISelectWithCheckboxProps<T extends Record<string, any> = Option
 export default function SelectWithCheckbox<T extends Record<string, any> = OptionType>({
   value = [],
   onChange,
-  options,
+  options = [],
   placeholder = '请选择',
   labelKey = 'label',
   valueKey = 'value',
@@ -68,7 +68,8 @@ export default function SelectWithCheckbox<T extends Record<string, any> = Optio
   const [searchTerm, setSearchTerm] = useState('')
 
   const filteredOptions = useMemo(() => {
-    return options.filter(opt =>
+    const validOptions = Array.isArray(options) ? options : []
+    return validOptions.filter(opt =>
       String(opt[labelKey] ?? '')
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
@@ -164,6 +165,7 @@ export default function SelectWithCheckbox<T extends Record<string, any> = Optio
       popupRender={CustomDropdown}
       style={{ width: '100%' }}
       placeholder={placeholder}
+      showSearch
       onSearch={setSearchTerm}
       filterOption={false}
       tagRender={({ value: tagValue }) => {
