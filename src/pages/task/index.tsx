@@ -215,21 +215,21 @@ export default function TaskManageComponent() {
     if (isDebugEnable) log.info('停止任务:', id)
     const { code, msg } = await api.job.stopJob(id)
     handleToastMsg(code, msg)
-    search.reset()
+    search.submit()
   }
 
   async function onStart(id: number) {
     if (isDebugEnable) log.info('执行任务:', id)
     const { code, msg } = await api.job.startJob(id)
     handleToastMsg(code, msg)
-    search.reset()
+    search.submit()
   }
 
   async function handleRunOnce({
-                                 id,
-                                 executorParam,
-                                 addressList,
-                               }: {
+    id,
+    executorParam,
+    addressList,
+  }: {
     id: number | string
     executorParam: string
     addressList: string
@@ -238,7 +238,6 @@ export default function TaskManageComponent() {
     const { code, msg } = await api.job.triggerJob({ id, executorParam, addressList })
     // todo 弹窗字段补全
     handleToastMsg(code, msg)
-    search.reset()
   }
 
   function handleViewItem(record: Job.JobItem) {
@@ -325,7 +324,7 @@ export default function TaskManageComponent() {
 
   const fetchData = async (
     { current, pageSize }: { current: number; pageSize: number },
-    formData: Job.PageListParams,
+    formData: Job.PageListParams
   ) => {
     try {
       const res = await api.job.getJobInfoList({
@@ -390,7 +389,7 @@ export default function TaskManageComponent() {
         },
       })
     },
-    [confirm, search],
+    [confirm, search]
   )
 
   const handleBatchDelete = () => {

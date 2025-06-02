@@ -78,11 +78,8 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
     // 智能设置表单数据
     const initialData = data || ({} as Job.JobItem)
     setJobInfo(initialData)
-
-    // 编辑/查看模式的特殊处理
-    if (action === 'edit' || action === 'view') {
-      form.setFieldsValue(initialData) // 立即填充表单数据
-    }
+    // 立即填充表单数据
+    form.setFieldsValue(initialData)
   }
 
   function handleCancel() {
