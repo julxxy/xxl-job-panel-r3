@@ -25,7 +25,6 @@ import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import TaskModalPrimary, { handleToastMsg } from '@/pages/task/TaskModalPrimary'
-import dayjs from 'dayjs'
 
 /**
  * 任务管理
@@ -208,7 +207,9 @@ export default function TaskManageComponent() {
       scheduleType: record.scheduleType,
     })
     if (isDebugEnable) log.info('具体执行时间:', content)
-    return code === 200 && content ? dayjs(content[0]).format('YYYY/MM/DD HH:mm:ss') : 'N/A'
+
+    if (code !== 200 || !content) return 'N/A'
+    return content
   }
 
   async function onStop(id: number) {
@@ -269,9 +270,9 @@ export default function TaskManageComponent() {
    */
   function MoreActionsMenu({ record }: { record: Job.JobItem }) {
     const [open, setOpen] = useState(false)
-    const [nextTriggerTime, setNextTriggerTime] = useState<string | undefined>('N/A')
+    const [nextTriggerTime, setNextTriggerTime] = useState<string[] | undefined | string>('N/A')
     // 使用 ref 缓存结果，避免重复请求
-    const triggerTimeCache = useRef<Map<number, string>>(new Map())
+    const triggerTimeCache = useRef<Map<number, string[] | string>>(new Map())
 
     const handleToggleMenu = async (newOpen: boolean) => {
       setOpen(newOpen)
@@ -280,9 +281,8 @@ export default function TaskManageComponent() {
         // 只有在未缓存时才请求
         if (!triggerTimeCache.current.has(record.id)) {
           const result = await handleNextTriggerTime(record)
-          const timeStr = result ?? 'N/A'
-          triggerTimeCache.current.set(record.id, timeStr)
-          setNextTriggerTime(timeStr)
+          triggerTimeCache.current.set(record.id, result)
+          setNextTriggerTime(result)
         } else {
           setNextTriggerTime(triggerTimeCache.current.get(record.id)!)
         }
@@ -307,7 +307,14 @@ export default function TaskManageComponent() {
           </DropdownMenuItem>
           <DropdownMenuItem disabled>
             <ClockIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-            下次执行时间：{nextTriggerTime}
+            <div className="flex flex-col">
+              下次执行时间：
+              {Array.isArray(nextTriggerTime) ? (
+                nextTriggerTime.slice(0, 3).map((time, index) => <span key={index}>{time}</span>)
+              ) : (
+                <span>{nextTriggerTime}</span>
+              )}
+            </div>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleClone(record)}>
             <ClipboardCopyIcon className="mr-2 h-4 w-4" />
