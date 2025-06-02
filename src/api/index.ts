@@ -3,7 +3,7 @@ import { LoginParams } from '@/types/auth.ts'
 import { ChartInfoParams, ChartInfoResponse, Job, Result, TDashboardTaskStats, User } from '@/types'
 
 /**
- * API Request Entities Management
+ * API Request Management
  */
 export default {
   user: {
