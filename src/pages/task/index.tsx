@@ -25,6 +25,7 @@ import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import TaskModalPrimary, { handleToastMsg } from '@/pages/task/TaskModalPrimary'
+import dayjs from 'dayjs'
 
 /**
  * 任务管理
@@ -208,7 +209,7 @@ export default function TaskManageComponent() {
     })
     if (isDebugEnable) log.info('具体执行时间:', content)
 
-    if (code !== 200 || !content) return 'N/A'
+    if (code !== 200 || content?.length === 0 || !content) return 'N/A'
     return content
   }
 
@@ -270,8 +271,7 @@ export default function TaskManageComponent() {
    */
   function MoreActionsMenu({ record }: { record: Job.JobItem }) {
     const [open, setOpen] = useState(false)
-    const [nextTriggerTime, setNextTriggerTime] = useState<string[] | undefined | string>('N/A')
-    // 使用 ref 缓存结果，避免重复请求
+    const [nextTriggerTime, setNextTriggerTime] = useState<string[] | string | undefined>('N/A')
     const triggerTimeCache = useRef<Map<number, string[] | string>>(new Map())
 
     const handleToggleMenu = async (newOpen: boolean) => {
@@ -307,13 +307,23 @@ export default function TaskManageComponent() {
           </DropdownMenuItem>
           <DropdownMenuItem disabled>
             <ClockIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+
             <div className="flex flex-col">
-              下次执行时间：
-              {Array.isArray(nextTriggerTime) ? (
-                nextTriggerTime.slice(0, 3).map((time, index) => <span key={index}>{time}</span>)
-              ) : (
-                <span>{nextTriggerTime}</span>
-              )}
+              <span className="text-sm text-muted-foreground">下次执行时间</span>
+
+              <div
+                className={`flex flex-col mt-1 space-y-0.5 transition-opacity duration-300 ${nextTriggerTime ? 'opacity-100' : 'opacity-0'}`}
+              >
+                {Array.isArray(nextTriggerTime) ? (
+                  nextTriggerTime.slice(0, 3).map((time, index) => (
+                    <span key={index} className="text-sm text-foreground">
+                      {dayjs(time).format('YYYY/MM/DD HH:mm:ss')}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-sm text-foreground">{nextTriggerTime}</span>
+                )}
+              </div>
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleClone(record)}>
