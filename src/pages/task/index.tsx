@@ -20,12 +20,14 @@ import {
   RocketIcon,
   TrashIcon,
 } from '@radix-ui/react-icons'
-import { DeleteIcon, EditIcon, MoreHorizontal, PauseIcon, PlayIcon, ViewIcon } from 'lucide-react'
+import { DeleteIcon, EditIcon, MoreHorizontal, PauseIcon, PlayIcon } from 'lucide-react'
 import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import TaskModalPrimary, { handleToastMsg } from '@/pages/task/TaskModalPrimary'
 import dayjs from 'dayjs'
+import { RegistryNodeModal } from '@/pages/task/RegistryNodeModal.tsx'
+import { getGlueTypeDesc, GlueTypeEnum } from '@/types/enum.ts'
 
 /**
  * 任务管理
@@ -145,12 +147,7 @@ export default function TaskManageComponent() {
       title: '运行模式',
       dataIndex: 'glueType',
       render: (glueType: string) => {
-        switch (glueType) {
-          case 'BEAN':
-            return 'BEAN'
-          default:
-            return '未知'
-        }
+        return getGlueTypeDesc(glueType as GlueTypeEnum)
       },
     },
     { title: '负责人', dataIndex: 'author' },
@@ -192,8 +189,8 @@ export default function TaskManageComponent() {
           />
           {/* 编辑 */}
           <IconTooltipButton tooltip="编辑任务" icon={<EditIcon size={16} />} onClick={() => handleEdit(record)} />
-          {/* 查看 */}
-          <IconTooltipButton tooltip="查看" icon={<ViewIcon size={16} />} onClick={handleViewItem(record)} />
+          {/* 查询日志 */}
+          <IconTooltipButton tooltip="查询日志" icon={<EyeOpenIcon />} onClick={() => handleViewLog(record)} />
           {/* 更多操作 */}
           <MoreActionsMenu record={record} />
         </Space>
@@ -238,25 +235,14 @@ export default function TaskManageComponent() {
   }) {
     if (isDebugEnable) log.info('执行一次: ', id, executorParam, addressList)
     const { code, msg } = await api.job.triggerJob({ id, executorParam, addressList })
-    // todo 弹窗字段补全
     handleToastMsg(code, msg)
   }
 
-  function handleViewItem(record: Job.JobItem) {
-    return () => {
-      record._jobGroupOptions = jobGroupOptions
-      modalRef?.current.openModal('view', record)
-    }
-  }
-
-  function handleViewLog(id: number) {
-    if (isDebugEnable) log.info('查看日志: ', id)
-    // todo
-  }
-
-  function handleRegisterNode(id: number) {
-    if (isDebugEnable) log.info('注册节点: ', id)
-    // todo
+  async function handleViewLog(record: Job.JobItem) {
+    if (isDebugEnable) log.info('查看日志: ', record)
+    const { content } = await api.logger.getJobsByGroup(record.jobGroup)
+    if (isDebugEnable) log.info('查看日志: ', content)
+    // todo 动态跳转页面
   }
 
   function handleClone(record: Job.JobItem) {
@@ -297,14 +283,15 @@ export default function TaskManageComponent() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="bottom" align="end">
-          <DropdownMenuItem onClick={() => handleViewLog(record.id)}>
-            <EyeOpenIcon className="mr-2 h-4 w-4" />
-            查询日志
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleRegisterNode(record.id)}>
-            <GearIcon className="mr-2 h-4 w-4" />
-            注册节点
-          </DropdownMenuItem>
+          <RegistryNodeModal
+            jobGroupId={record.jobGroup}
+            trigger={
+              <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                <GearIcon className="mr-2 h-4 w-4" />
+                注册节点
+              </DropdownMenuItem>
+            }
+          />
           <DropdownMenuItem disabled>
             <ClockIcon className="mr-2 h-4 w-4 text-muted-foreground" />
 
@@ -463,10 +450,7 @@ export default function TaskManageComponent() {
         />
       </div>
 
-      <TaskModalPrimary
-        parentRef={modalRef}
-        onRefresh={() => (action === 'create' ? search.reset() : search.submit())}
-      />
+      <TaskModalPrimary parentRef={modalRef} onRefresh={() => (action === 'edit' ? search.submit() : search.reset())} />
 
       {dialog}
     </div>

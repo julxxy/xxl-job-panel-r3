@@ -118,10 +118,6 @@ export namespace Job {
     content: JobGroupInfo[]
   }
 
-  export function getRegistryList(info: JobGroupInfo): string[] {
-    return info.addressList?.trim() ? info.addressList.split(',') : []
-  }
-
   export interface HomePageParams {
     jobGroup?: number // 可选，可以为 -1 或其他 number
   }
@@ -170,13 +166,9 @@ export namespace JobGroup {
     id?: number // 可选，新增时可能没有
     appname: string // 应用名，长度 4~64，不能含有 <>，必填
     title: string // 标题，不能含有 <>，必填
-    addressType: number // 0=自动注册，1=手动录入
+    addressType: 0 | 1 // 0=自动注册，1=手动录入
     addressList?: string // 多地址逗号分隔，仅当 addressType != 0 时必填
     updateTime?: string // 可选，由后端赋值
-  }
-
-  export interface AddJobGroup extends Item {
-    addressType: 0 | 1 // 0=自动注册，1=手动录入
     registryList?: string[] // 前端可解析字段
   }
 
@@ -276,7 +268,7 @@ export interface JobCodeSaveRequest {
   glueRemark: string // 本次更新备注，4~100 字符
 }
 
-export interface XxlJobLogGlue {
+export interface JobCodeGlue {
   id: number
   jobId: number
   glueType: string
@@ -289,7 +281,7 @@ export interface XxlJobLogGlue {
 export interface JobCodeHomeResponse {
   GlueTypeEnum: string
   jobInfo: Job.JobItem
-  jobLogGlues: XxlJobLogGlue[]
+  jobLogGlues: JobCodeGlue[]
 }
 
 export interface ChartInfoParams {
