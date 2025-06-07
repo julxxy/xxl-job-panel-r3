@@ -509,7 +509,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
         onCancel={() => setHistoryDialogOpen(false)}
         footer={
           <div className="flex justify-end gap-2 px-6 pb-4">
-            <Button variant="default" size="sm" onClick={() => setHistoryDialogOpen(false)}>
+            <Button variant="secondary" size="sm" onClick={() => setHistoryDialogOpen(false)}>
               关闭
             </Button>
           </div>
