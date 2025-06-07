@@ -87,7 +87,11 @@ export default {
       return apiClient.post<Result>('/jobcode/save', params, { ...apiClient.generateFormHeaders() })
     },
     getGlueHistory(jobId: number) {
-      return apiClient.get<Result<JobCodeGlue[]>>('/r3/support/v1/job/glue/history', { jobId }, { ...apiClient.generateFormHeaders() })
+      return apiClient.get<Result<JobCodeGlue[]>>(
+        '/r3/support/v1/job/glue/history',
+        { jobId },
+        { ...apiClient.generateFormHeaders() }
+      )
     },
   },
 
@@ -98,7 +102,7 @@ export default {
         { id },
         {
           ...apiClient.generateFormHeaders(),
-        },
+        }
       )
     },
   },
@@ -108,7 +112,7 @@ export default {
       return apiClient.get<Result<JobGroup.Item>>(
         '/joblog/getJobsByGroup',
         { jobGroup },
-        { ...apiClient.generateFormHeaders() },
+        { ...apiClient.generateFormHeaders() }
       )
     },
     getLogDetails(params: Logger.LogDetailCatParams) {
