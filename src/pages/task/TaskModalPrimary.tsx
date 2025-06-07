@@ -2,7 +2,7 @@ import { IAction, IModalProps } from '@/types/modal.ts'
 import { Job, JobCodeGlue } from '@/types'
 import { ShadcnAntdModal } from '@/components/ShadcnAntdModal.tsx'
 import { isDebugEnable, log } from '@/common/Logger.ts'
-import { useEffect, useImperativeHandle, useRef, useState } from 'react'
+import React, { useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Card, Col, Collapse, Form, Input, Row, Select, Spin } from 'antd'
 import CronEditor from '@/pages/cron/CronEditor.tsx'
 import { ExecutorRouteStrategyI18n, glueLangMap, GlueTypeConfig, GlueTypeEnum, ScheduleTypeEnum } from '@/types/enum.ts'
@@ -14,8 +14,9 @@ import { toast } from '@/utils/toast.ts'
 import md5 from 'blueimp-md5'
 import { Button } from '@/components/ui/button.tsx'
 import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
-import { EyeIcon, HistoryIcon, Undo2Icon } from 'lucide-react'
+import { EyeIcon, HistoryIcon, Move, Undo2Icon } from 'lucide-react'
 import { formatDateToLocalString } from '@/utils'
+import Draggable from 'react-draggable'
 
 // 标题
 function getTitleText(action: IAction) {
@@ -67,6 +68,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
     label: config.desc,
     value: value as GlueTypeEnum,
   }))
+  const historyModalRef = useRef<HTMLDivElement>(null)
 
   // 暴露方法给父组件
   useImperativeHandle(parentRef, () => ({
@@ -492,7 +494,18 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
         destroyOnHidden
         style={{ top: '10%' }}
         styles={{ body: { maxHeight: '40vh', minHeight: 400, overflowY: 'auto' } }}
-        title="Glue代码历史版本"
+        title={
+          <div
+            className="drag-handle w-full flex items-center justify-center font-semibold text-base select-none"
+            style={{ cursor: 'move' }}
+          >
+            <span style={{ flex: 1, textAlign: 'center' }}>Glue代码历史版本</span>
+            <span className="text-xs text-gray-400 flex mr-24">
+              <Move size={14} />
+              可拖动
+            </span>
+          </div>
+        }
         onCancel={() => setHistoryDialogOpen(false)}
         footer={
           <div className="flex justify-end gap-2 px-6 pb-4">
@@ -501,6 +514,11 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
             </Button>
           </div>
         }
+        modalRender={modal => (
+          <Draggable nodeRef={historyModalRef as React.RefObject<HTMLDivElement>} handle=".drag-handle">
+            <div ref={historyModalRef}>{modal}</div>
+          </Draggable>
+        )}
       >
         {() =>
           historyLoading ? (
