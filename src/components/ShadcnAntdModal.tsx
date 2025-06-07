@@ -18,6 +18,7 @@ interface ShadModalProps<T = any> {
   centered?: boolean
   loading?: boolean
   footer?: React.ReactNode | null
+  modalRender?: (node: React.ReactNode) => React.ReactNode
   className?: string
   style?: CSSProperties
   styles?: ModalStyles
@@ -40,6 +41,7 @@ export function ShadcnAntdModal<T = any>({
   centered = false,
   loading = false,
   footer,
+  modalRender,
   className,
   style,
   styles,
@@ -80,6 +82,7 @@ export function ShadcnAntdModal<T = any>({
       title={<div className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">{title}</div>}
       onCancel={onCancel}
       onOk={onOk}
+      modalRender={modalRender}
       footer={footer !== undefined ? footer : renderDefaultFooter()}
       confirmLoading={false}
       width={width}
