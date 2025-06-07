@@ -501,7 +501,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
         destroyOnHidden
         style={{ top: '10%' }}
         styles={{ body: { maxHeight: '40vh', minHeight: 400, overflowY: 'auto' } }}
-        title="Glue脚本历史版本"
+        title="Glue代码历史版本"
         onCancel={() => setHistoryDialogOpen(false)}
         footer={
           <div className="flex justify-end gap-2 px-6 pb-4">
