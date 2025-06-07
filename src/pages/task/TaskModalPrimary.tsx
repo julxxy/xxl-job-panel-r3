@@ -103,7 +103,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
     form.setFieldsValue(initialData)
 
     // 记录初始脚本内容
-    let initialGlueSource = ''
+    let initialGlueSource: string
     if (action === 'edit') {
       initialGlueSource = data?.glueSource || ''
     } else {
@@ -414,7 +414,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
                                 '\n当前MD5:',
                                 newMd5,
                                 '\n是否变更:',
-                                newMd5 !== initialGlueSourceMd5Ref.current
+                                newMd5 !== initialGlueSourceMd5Ref.current,
                               )
                             }
                           }}
@@ -538,7 +538,8 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
                         variant="ghost"
                         tooltip="预览脚本"
                         icon={<EyeIcon />}
-                        onClick={() => {}}
+                        onClick={() => {
+                        }}
                       />
                       <IconTooltipButton
                         size="sm"
