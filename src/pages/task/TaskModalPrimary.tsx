@@ -1,9 +1,9 @@
 import { IAction, IModalProps } from '@/types/modal.ts'
-import { Job } from '@/types'
+import { Job, JobCodeGlue } from '@/types'
 import { ShadcnAntdModal } from '@/components/ShadcnAntdModal.tsx'
 import { isDebugEnable, log } from '@/common/Logger.ts'
 import { useEffect, useImperativeHandle, useRef, useState } from 'react'
-import { Button, Card, Col, Drawer, Form, Input, List, Row, Select, Tooltip } from 'antd'
+import { Card, Col, Collapse, Form, Input, Row, Select, Spin } from 'antd'
 import CronEditor from '@/pages/cron/CronEditor.tsx'
 import { ExecutorRouteStrategyI18n, glueLangMap, GlueTypeConfig, GlueTypeEnum, ScheduleTypeEnum } from '@/types/enum.ts'
 import Editor from '@monaco-editor/react'
@@ -12,7 +12,10 @@ import useZustandStore from '@/stores/useZustandStore.ts'
 import api from '@/api'
 import { toast } from '@/utils/toast.ts'
 import md5 from 'blueimp-md5'
-import { EyeOutlined, HistoryOutlined, RollbackOutlined } from '@ant-design/icons'
+import { Button } from '@/components/ui/button.tsx'
+import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
+import { EyeIcon, HistoryIcon, Undo2Icon } from 'lucide-react'
+import { formatDateToLocalString } from '@/utils'
 
 // 历史版本类型
 export interface GlueHistoryItem {
@@ -62,10 +65,9 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
   const [editorCode, setEditorCode] = useState('')
   const [glueHistory, setGlueHistory] = useState<GlueHistoryItem[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
-  const [historyVisible, setHistoryVisible] = useState(false)
-  const [previewContent, setPreviewContent] = useState<string | null>(null)
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const formRef = useRef(form)
-  const { isDarkEnable } = useZustandStore()
+  const { isDarkEnable, userInfo } = useZustandStore()
   const monacoTheme = isDarkEnable ? 'vs-dark' : 'vs'
   const scheduleType = Form.useWatch('scheduleType', form) as ScheduleTypeEnum
   const glueType = Form.useWatch('glueType', form) as GlueTypeEnum
@@ -109,24 +111,33 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
     }
     initialGlueSourceMd5Ref.current = md5(initialGlueSource)
 
-    // 获取历史版本
-    if (action !== 'create' && data?.id) {
-      fetchGlueHistory(data.id)
-    } else {
-      setGlueHistory([])
-    }
+    // 清空 glue 历史版本
+    setGlueHistory([])
   }
 
   // 获取历史版本
   const fetchGlueHistory = async (jobId: number) => {
     setHistoryLoading(true)
     try {
-      const { code, content } = await api.jobCode.getGlueHistory(jobId)
+      const { code, content, msg } = await api.jobCode.getGlueHistory(jobId)
       if (code === 200) {
         setGlueHistory(content || [])
+      } else {
+        toast.error(msg || '获取历史版本失败')
+        setGlueHistory([])
       }
+    } catch (err) {
+      toast.error('获取历史版本异常')
+      setGlueHistory([])
     } finally {
       setHistoryLoading(false)
+    }
+  }
+
+  const handleOpenHistory = async () => {
+    setHistoryDialogOpen(true)
+    if (jobInfo.id && glueHistory.length === 0 && !historyLoading) {
+      await fetchGlueHistory(jobInfo.id)
     }
   }
 
@@ -139,7 +150,8 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
         const params = {
           id: values.id,
           glueSource: values.glueSource,
-          glueRemark: action === 'create' ? '初始化脚本' : '编辑脚本',
+          glueRemark:
+            action === 'create' ? `${userInfo.username + '初始化脚本'}` : `${userInfo.username + '更新了脚本'}`,
         }
         await api.jobCode.addGlue(params)
       }
@@ -276,7 +288,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label="报警邮件" name="alarmEmail" rules={[{ required: true }]}>
+                  <Form.Item label="报警邮件" name="alarmEmail" rules={[{ required: false }]}>
                     <Input placeholder="请输入报警邮件，多个逗号分隔" />
                   </Form.Item>
                 </Col>
@@ -369,18 +381,19 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
                       rules={[{ required: true, message: '请输入脚本内容' }]}
                     >
                       <div className="border rounded-md overflow-hidden dark:border-zinc-800">
-                        {/* 历史按钮 */}
+                        {/* 历史版本按钮 */}
                         {action !== 'create' && (
-                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                            <Button
-                              icon={<HistoryOutlined />}
-                              size="small"
-                              onClick={() => setHistoryVisible(true)}
-                              style={{ marginRight: 8 }}
-                            >
-                              脚本历史版本
-                            </Button>
-                            {isGlueSourceChanged && <span style={{ color: '#faad14' }}>脚本已修改</span>}
+                          <div className="flex items-center justify-between">
+                            <span>
+                              {isGlueSourceChanged && <span className="text-yellow-500 ml-2">脚本已修改</span>}
+                            </span>
+                            <IconTooltipButton
+                              size="sm"
+                              tooltip="历史版本"
+                              variant="ghost"
+                              icon={<HistoryIcon />}
+                              onClick={handleOpenHistory}
+                            />
                           </div>
                         )}
                         <Editor
@@ -481,90 +494,89 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
       </ShadcnAntdModal>
 
       {/* 历史版本抽屉 */}
-      <Drawer
-        title="脚本历史版本"
-        placement="right"
-        width={420}
-        open={historyVisible}
-        onClose={() => {
-          setHistoryVisible(false)
-          setPreviewContent(null)
-        }}
-        extra={
-          previewContent && (
-            <Button
-              icon={<RollbackOutlined />}
-              type="primary"
-              size="small"
-              onClick={() => {
-                setEditorCode(previewContent)
-                form.setFieldValue('glueSource', previewContent)
-                initialGlueSourceMd5Ref.current = md5(previewContent)
-                setIsGlueSourceChanged(false)
-                setHistoryVisible(false)
-                setPreviewContent(null)
-              }}
-            >
-              回填到编辑器
+      <ShadcnAntdModal<JobCodeGlue>
+        open={historyDialogOpen}
+        width={580}
+        action="view"
+        destroyOnHidden
+        style={{ top: '10%' }}
+        styles={{ body: { maxHeight: '40vh', minHeight: 400, overflowY: 'auto' } }}
+        title="Glue脚本历史版本"
+        onCancel={() => setHistoryDialogOpen(false)}
+        footer={
+          <div className="flex justify-end gap-2 px-6 pb-4">
+            <Button variant="default" size="sm" onClick={() => setHistoryDialogOpen(false)}>
+              关闭
             </Button>
-          )
+          </div>
         }
       >
-        <List
-          itemLayout="horizontal"
-          dataSource={glueHistory}
-          loading={historyLoading}
-          renderItem={item => (
-            <List.Item
-              actions={[
-                <Tooltip title="预览内容" key="preview">
-                  <Button icon={<EyeOutlined />} size="small" onClick={() => setPreviewContent(item.glueSource)} />
-                </Tooltip>,
-                <Tooltip title="回填到编辑器" key="fill">
-                  <Button
-                    icon={<RollbackOutlined />}
-                    size="small"
-                    onClick={() => {
-                      setEditorCode(item.glueSource)
-                      form.setFieldValue('glueSource', item.glueSource)
-                      initialGlueSourceMd5Ref.current = md5(item.glueSource)
-                      setIsGlueSourceChanged(false)
-                      setHistoryVisible(false)
-                      setPreviewContent(null)
-                    }}
-                  />
-                </Tooltip>,
-              ]}
-            >
-              <List.Item.Meta
-                title={
-                  <span>
-                    {item.glueRemark}
-                    <span style={{ color: '#888', marginLeft: 8, fontSize: 12 }}>{item.updateTime}</span>
-                  </span>
-                }
-                description={<span style={{ color: '#aaa', fontSize: 12 }}>{item.glueType}</span>}
-              />
-            </List.Item>
-          )}
-        />
-        {previewContent && (
-          <div style={{ marginTop: 16 }}>
-            <div style={{ fontWeight: 500, marginBottom: 4 }}>内容预览：</div>
-            <pre
-              style={{
-                background: '#f6f6f6',
-                padding: 12,
-                borderRadius: 4,
-                maxHeight: 200,
-                overflow: 'auto',
-              }}
-            >
-              {previewContent}
-            </pre>
-          </div>
-        )}
-      </Drawer>
+        {() =>
+          historyLoading ? (
+            <div style={{ textAlign: 'center', padding: 32 }}>
+              <Spin />
+            </div>
+          ) : (
+            <>
+              <Collapse
+                accordion
+                defaultActiveKey={['0']}
+                items={glueHistory.map((item, idx) => ({
+                  key: String(idx),
+                  label: (
+                    <div>
+                      <span style={{ color: '#888', marginRight: 8, fontSize: 12 }}>
+                        {formatDateToLocalString(item.updateTime)}
+                      </span>
+                      <span>{item.glueRemark}</span>
+                    </div>
+                  ),
+                  extra: (
+                    <>
+                      <IconTooltipButton
+                        size="sm"
+                        variant="ghost"
+                        tooltip="预览脚本"
+                        icon={<EyeIcon />}
+                        onClick={() => {}}
+                      />
+                      <IconTooltipButton
+                        size="sm"
+                        variant="ghost"
+                        tooltip="回填脚本"
+                        icon={<Undo2Icon />}
+                        onClick={() => {
+                          setEditorCode(item.glueSource)
+                          form.setFieldValue('glueSource', item.glueSource)
+                          setIsGlueSourceChanged(initialGlueSourceMd5Ref.current !== md5(item.glueSource))
+                          setHistoryDialogOpen(false)
+                        }}
+                      />
+                    </>
+                  ),
+                  children: (
+                    <>
+                      <div style={{ marginBottom: 8, color: '#aaa', fontSize: 12 }}>{item.glueType}</div>
+                      <pre
+                        style={{
+                          padding: 12,
+                          borderRadius: 4,
+                          maxHeight: 200,
+                          overflow: 'auto',
+                          fontSize: 13,
+                          marginBottom: 0,
+                        }}
+                      >
+                        {item.glueSource}
+                      </pre>
+                    </>
+                  ),
+                }))}
+              ></Collapse>
+            </>
+          )
+        }
+      </ShadcnAntdModal>
     </>
   )
 }

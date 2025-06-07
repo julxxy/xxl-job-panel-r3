@@ -11,16 +11,8 @@ import { ColumnsType } from 'antd/es/table'
 import { Space, Table } from 'antd'
 import { toast } from '@/utils/toast.ts'
 import { Badge } from '@/components/ui/badge.tsx'
-import {
-  ClipboardCopyIcon,
-  ClockIcon,
-  EyeOpenIcon,
-  GearIcon,
-  PlusIcon,
-  RocketIcon,
-  TrashIcon,
-} from '@radix-ui/react-icons'
-import { DeleteIcon, EditIcon, MoreHorizontal, PauseIcon, PlayIcon } from 'lucide-react'
+import { ClipboardCopyIcon, ClockIcon, GearIcon, PlusIcon, RocketIcon, TrashIcon } from '@radix-ui/react-icons'
+import { DeleteIcon, EditIcon, LogsIcon, MoreHorizontal, PauseIcon, PlayIcon } from 'lucide-react'
 import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
@@ -190,7 +182,7 @@ export default function TaskManageComponent() {
           {/* 编辑 */}
           <IconTooltipButton tooltip="编辑任务" icon={<EditIcon size={16} />} onClick={() => handleEdit(record)} />
           {/* 查询日志 */}
-          <IconTooltipButton tooltip="查询日志" icon={<EyeOpenIcon />} onClick={() => handleViewLog(record)} />
+          <IconTooltipButton tooltip="查询日志" icon={<LogsIcon />} onClick={() => handleViewLog(record)} />
           {/* 更多操作 */}
           <MoreActionsMenu record={record} />
         </Space>
