@@ -116,6 +116,11 @@ export const glueLangMap: Record<GlueTypeEnum, string> = {
   [GlueTypeEnum.GLUE_SHELL]: 'shell',
 }
 
+// 根据 value 返回 desc
+export function getGlueTypeDesc(value: GlueTypeEnum): string | undefined {
+  return GlueTypeConfig[value]?.desc ?? '未知'
+}
+
 /**
  * 路由策略（按使用频次排序）
  */
