@@ -17,16 +17,7 @@ import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
 import { EyeIcon, HistoryIcon, Undo2Icon } from 'lucide-react'
 import { formatDateToLocalString } from '@/utils'
 
-// 历史版本类型
-export interface GlueHistoryItem {
-  jobId: number
-  glueType: string
-  glueSource: string
-  glueRemark: string
-  addTime: string
-  updateTime: string
-}
-
+// 标题
 function getTitleText(action: IAction) {
   const title = '任务'
   if (action === 'create') {
@@ -63,7 +54,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
   const initialGlueSourceMd5Ref = useRef<string>('')
   const [isGlueSourceChanged, setIsGlueSourceChanged] = useState(false)
   const [editorCode, setEditorCode] = useState('')
-  const [glueHistory, setGlueHistory] = useState<GlueHistoryItem[]>([])
+  const [glueHistory, setGlueHistory] = useState<JobCodeGlue[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const formRef = useRef(form)
@@ -414,7 +405,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
                                 '\n当前MD5:',
                                 newMd5,
                                 '\n是否变更:',
-                                newMd5 !== initialGlueSourceMd5Ref.current,
+                                newMd5 !== initialGlueSourceMd5Ref.current
                               )
                             }
                           }}
@@ -538,8 +529,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
                         variant="ghost"
                         tooltip="预览脚本"
                         icon={<EyeIcon />}
-                        onClick={() => {
-                        }}
+                        onClick={() => {}}
                       />
                       <IconTooltipButton
                         size="sm"
