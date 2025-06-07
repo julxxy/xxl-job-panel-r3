@@ -493,7 +493,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
         action="view"
         destroyOnHidden
         style={{ top: '10%' }}
-        styles={{ body: { maxHeight: '40vh', minHeight: 400, overflowY: 'auto' } }}
+        styles={{ body: { maxHeight: '35vh', minHeight: 400, overflowY: 'auto' } }}
         title={
           <div
             className="drag-handle w-full flex items-center justify-center font-semibold text-base select-none"
@@ -558,7 +558,6 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
                           setEditorCode(item.glueSource)
                           form.setFieldValue('glueSource', item.glueSource)
                           setIsGlueSourceChanged(initialGlueSourceMd5Ref.current !== md5(item.glueSource))
-                          setHistoryDialogOpen(false)
                         }}
                       />
                     </>
