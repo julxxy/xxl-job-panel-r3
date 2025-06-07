@@ -14,7 +14,7 @@ import { toast } from '@/utils/toast.ts'
 import md5 from 'blueimp-md5'
 import { Button } from '@/components/ui/button.tsx'
 import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
-import { EyeIcon, HistoryIcon, Move, Undo2Icon } from 'lucide-react'
+import { ClipboardPaste, HistoryIcon, Move } from 'lucide-react'
 import { formatDateToLocalString } from '@/utils'
 import Draggable from 'react-draggable'
 
@@ -541,26 +541,17 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
                     </div>
                   ),
                   extra: (
-                    <>
-                      <IconTooltipButton
-                        size="sm"
-                        variant="ghost"
-                        tooltip="预览脚本"
-                        icon={<EyeIcon />}
-                        onClick={() => {}}
-                      />
-                      <IconTooltipButton
-                        size="sm"
-                        variant="ghost"
-                        tooltip="回填脚本"
-                        icon={<Undo2Icon />}
-                        onClick={() => {
-                          setEditorCode(item.glueSource)
-                          form.setFieldValue('glueSource', item.glueSource)
-                          setIsGlueSourceChanged(initialGlueSourceMd5Ref.current !== md5(item.glueSource))
-                        }}
-                      />
-                    </>
+                    <IconTooltipButton
+                      size="sm"
+                      variant="ghost"
+                      tooltip="回填脚本"
+                      icon={<ClipboardPaste />}
+                      onClick={() => {
+                        setEditorCode(item.glueSource)
+                        form.setFieldValue('glueSource', item.glueSource)
+                        setIsGlueSourceChanged(initialGlueSourceMd5Ref.current !== md5(item.glueSource))
+                      }}
+                    />
                   ),
                   children: (
                     <>
