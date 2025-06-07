@@ -13,8 +13,8 @@ echo "分片序号 = $2"
 echo "分片总数 = $3"
 
 for param in "$@"; do
-    echo "参数 : $param"
-    sleep 1s
+  echo "参数 : $param"
+  sleep 1s
 done
 
 echo "Good bye!"
