@@ -221,7 +221,7 @@ export default function ExecutorComponent() {
         className="text-center"
       >
         {() => (
-          <div className="flex flex-wrap gap-2 p-6 rounded-lg">
+          <div className="flex flex-wrap gap-4 p-4 rounded-lg">
             {nodes.map((node, idx) => (
               <Badge
                 key={idx}
