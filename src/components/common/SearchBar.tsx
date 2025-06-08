@@ -1,7 +1,7 @@
 import { DatePicker, Form, Input, Select } from 'antd'
 import { DownOutlined, UpOutlined } from '@ant-design/icons'
 import { Button } from '@/components/ui/button'
-import React, { MouseEventHandler, useState } from 'react'
+import React, { FormEventHandler, MouseEventHandler, useState } from 'react'
 import { RotateCcw, SearchIcon } from 'lucide-react'
 
 const { RangePicker } = DatePicker
@@ -39,6 +39,7 @@ export interface SearchBarProps {
   form: any
   onSearch: () => void
   onReset?: () => void
+  onChange?: FormEventHandler<any> | undefined // onChange 指定时 onSearch 不建议使用
   initialValues?: Record<string, any>
   buttons?: ActionButton[]
 }
@@ -50,9 +51,10 @@ export interface SearchBarProps {
  * @param initialValues 初始值
  * @param onSearch 搜索回调函数
  * @param onReset 重置回调函数
+ * @param onChange 搜索字段改变时回调
  * @param buttons 自定义按钮, 永远处于[搜索]和[重置]按钮的中间
  */
-export function SearchBar({ fields, form, initialValues, onSearch, onReset, buttons = [] }: SearchBarProps) {
+export function SearchBar({ fields, form, initialValues, onSearch, onReset, onChange, buttons = [] }: SearchBarProps) {
   const [expand, setExpand] = useState(false)
   const needExpand = fields.length > 2
 
@@ -99,7 +101,7 @@ export function SearchBar({ fields, form, initialValues, onSearch, onReset, butt
     )
 
     const searchButton = (
-      <Button key="search" variant="default" onClick={onSearch}>
+      <Button key="search" variant="default" onClick={onSearch} onChange={onChange}>
         <SearchIcon className="mr-1" />
         搜索
       </Button>

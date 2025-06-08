@@ -31,7 +31,7 @@ export default {
       return apiClient.get<User.UserPageListResponse>('/user/pageList', undefined, { params })
     },
     getUserGroupPermissions() {
-      return apiClient.get<Job.JobGroupInfoPermissions>('/r3/support/v1/user/group/permissions', undefined, {})
+      return apiClient.get<Job.JobGroupPermissions>('/r3/support/v1/user/group/permissions', undefined, {})
     },
     deleteUser(params: { id: number }) {
       return apiClient.post<Result>('/user/remove', undefined, { params })
@@ -54,8 +54,10 @@ export default {
   },
 
   job: {
-    getJobInfoList(params: Job.PageListParams) {
-      return apiClient.post<Job.PageListResponse>('/jobinfo/pageList', params, { ...apiClient.generateFormHeaders() })
+    getJobInfoList(params: Job.JobGroupRequestParams) {
+      return apiClient.post<Job.JobPageListResponse>('/jobinfo/pageList', params, {
+        ...apiClient.generateFormHeaders(),
+      })
     },
     addJob(params: Job.JobItem) {
       return apiClient.post<Result>('/jobinfo/add', params, { ...apiClient.generateFormHeaders() })
@@ -97,13 +99,19 @@ export default {
 
   jobGroup: {
     getRegistryNode(id: number | string) {
-      return apiClient.post<Result<JobGroup.Item>>(
-        '/jobgroup/loadById',
-        { id },
-        {
-          ...apiClient.generateFormHeaders(),
-        }
-      )
+      return apiClient.post<Result<JobGroup.Item>>('/jobgroup/loadById', { id }, { ...apiClient.generateFormHeaders() })
+    },
+    getJobGroups(params: JobGroup.PageParams) {
+      return apiClient.post<JobGroup.PageResponse>('/jobgroup/pageList', params, apiClient.generateFormHeaders())
+    },
+    deleteGroup(id: number) {
+      return apiClient.post<Result>('/jobgroup/remove', { id }, apiClient.generateFormHeaders())
+    },
+    editJobGroup(params: JobGroup.EditJobGroup) {
+      return apiClient.post<Result>('/jobgroup/update', params, apiClient.generateFormHeaders())
+    },
+    addJobGroup(params: JobGroup.Item) {
+      return apiClient.post<Result>('/jobgroup/save', params, apiClient.generateFormHeaders())
     },
   },
 

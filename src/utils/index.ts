@@ -1,5 +1,7 @@
 import dayjs, { Dayjs } from 'dayjs'
 import { format as formatDate } from 'date-fns'
+import { toast } from 'sonner'
+import React from 'react'
 
 /**
  * 安全解析数值
@@ -76,6 +78,18 @@ const formatDateToLocalString = (
   return formatDate(_date, pattern)
 }
 
+const handleCopy = (text: string, e?: React.MouseEvent) => {
+  if (e) e.stopPropagation()
+  navigator.clipboard
+    .writeText(text)
+    .then(() => {
+      toast.success('已复制到剪贴板')
+    })
+    .catch(() => {
+      toast.error('复制失败')
+    })
+}
+
 export {
   toNumeric,
   formatMoneyCNY,
@@ -84,4 +98,5 @@ export {
   formatDateToDayjs,
   formatDayjsToDateString,
   formatDateToLocalString,
+  handleCopy,
 }

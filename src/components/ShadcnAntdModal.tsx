@@ -23,7 +23,8 @@ interface ShadModalProps<T = any> {
   style?: CSSProperties
   styles?: ModalStyles
   action?: 'create' | 'edit' | 'view'
-  destroyOnHidden?: boolean // 注意：保留 destroy，会配合 useEffect 延迟设置字段
+  destroyOnHidden?: boolean
+  confirmLoading?: boolean
   children: (data?: T) => React.ReactNode
 }
 
@@ -47,6 +48,7 @@ export function ShadcnAntdModal<T = any>({
   styles,
   action = 'create',
   destroyOnHidden = true,
+  confirmLoading = false,
   children,
 }: ShadModalProps<T>) {
   const contentPadding = 'px-6 pt-4'
@@ -84,7 +86,7 @@ export function ShadcnAntdModal<T = any>({
       onOk={onOk}
       modalRender={modalRender}
       footer={footer !== undefined ? footer : renderDefaultFooter()}
-      confirmLoading={false}
+      confirmLoading={confirmLoading}
       width={width}
       className={clsx('rounded-md', 'w-full max-w-full', className)}
       style={style}

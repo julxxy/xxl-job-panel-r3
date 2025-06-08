@@ -17,7 +17,7 @@ export default function UserModal({ parentRef, onRefresh }: IModalProps) {
   const [open, setOpen] = useState(false)
   const [user, setUser] = useState<User.UserRecord>({} as User.UserRecord)
   const [action, setAction] = useState<IAction>('create')
-  const [jobGroup, setJobGroup] = useState<Job.JobGroupInfo[]>([])
+  const [jobGroup, setJobGroup] = useState<Job.JobGroup[]>([])
 
   const openModal = (action: IAction, data?: User.UserRecord) => {
     if (isDebugEnable) log.info('弹窗开启: ', action, data)
@@ -132,7 +132,7 @@ export default function UserModal({ parentRef, onRefresh }: IModalProps) {
 
           {roleValue === 0 && (
             <Form.Item name="permission" label="权限（多选）" rules={[{ required: true, message: '请选择至少一项' }]}>
-              <SelectWithCheckbox<Job.JobGroupInfo>
+              <SelectWithCheckbox<Job.JobGroup>
                 placeholder="请选择权限/搜索权限"
                 options={jobGroup}
                 labelKey="title"

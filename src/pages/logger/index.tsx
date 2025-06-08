@@ -11,7 +11,7 @@ export default function LogViewerComponent() {
   const [action, setAction] = useState<IAction>('create')
   const { confirm, dialog } = useConfirmDialog()
 
-  const currentRef = useRef<ModalAction>({
+  const modalRef = useRef<ModalAction>({
     openModal: (action, data) => {
       if (isDebugEnable) log.info('打开弹窗:', action, data)
       setAction(action)
