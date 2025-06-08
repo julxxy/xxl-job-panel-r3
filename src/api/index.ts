@@ -7,7 +7,7 @@ import {
   JobCodeGlue,
   JobCodeSaveRequest,
   JobGroup,
-  Logger,
+  JobLog,
   Result,
   TDashboardTaskStats,
   User,
@@ -37,10 +37,10 @@ export default {
       return apiClient.post<Result>('/user/remove', undefined, { params })
     },
     editUser(params: User.UserRecord) {
-      return apiClient.post<Result>('/user/update', params, { ...apiClient.generateFormHeaders() })
+      return apiClient.post<Result>('/user/update', params, apiClient.generateFormHeaders())
     },
     createUser(params: User.UserRecord) {
-      return apiClient.post<Result>('/user/add', params, { ...apiClient.generateFormHeaders() })
+      return apiClient.post<Result>('/user/add', params, apiClient.generateFormHeaders())
     },
   },
 
@@ -55,27 +55,25 @@ export default {
 
   job: {
     getJobInfoList(params: Job.JobGroupRequestParams) {
-      return apiClient.post<Job.JobPageListResponse>('/jobinfo/pageList', params, {
-        ...apiClient.generateFormHeaders(),
-      })
+      return apiClient.post<Job.JobPageListResponse>('/jobinfo/pageList', params, apiClient.generateFormHeaders())
     },
     addJob(params: Job.JobItem) {
-      return apiClient.post<Result>('/jobinfo/add', params, { ...apiClient.generateFormHeaders() })
+      return apiClient.post<Result>('/jobinfo/add', params, apiClient.generateFormHeaders())
     },
     editJob(params: Job.JobItem) {
-      return apiClient.post<Result>('/jobinfo/update', params, { ...apiClient.generateFormHeaders() })
+      return apiClient.post<Result>('/jobinfo/update', params, apiClient.generateFormHeaders())
     },
     deleteJob(id: number) {
-      return apiClient.post<Result>('/jobinfo/remove', { id }, { ...apiClient.generateFormHeaders() })
+      return apiClient.post<Result>('/jobinfo/remove', { id }, apiClient.generateFormHeaders())
     },
     startJob(id: number | string) {
-      return apiClient.post<Result>('/jobinfo/start', { id }, { ...apiClient.generateFormHeaders() })
+      return apiClient.post<Result>('/jobinfo/start', { id }, apiClient.generateFormHeaders())
     },
     stopJob(id: number | string) {
-      return apiClient.post<Result>('/jobinfo/stop', { id }, { ...apiClient.generateFormHeaders() })
+      return apiClient.post<Result>('/jobinfo/stop', { id }, apiClient.generateFormHeaders())
     },
     triggerJob(params: { id: number | string; executorParam: string; addressList: string }) {
-      return apiClient.post<Result>('/jobinfo/trigger', params, { ...apiClient.generateFormHeaders() })
+      return apiClient.post<Result>('/jobinfo/trigger', params, apiClient.generateFormHeaders())
     },
     nextTriggerTime(params: { scheduleType: string; scheduleConf: string }) {
       return apiClient.post<Result<string[]>>('/jobinfo/nextTriggerTime', params, {
@@ -86,20 +84,20 @@ export default {
 
   jobCode: {
     addGlue(params: JobCodeSaveRequest) {
-      return apiClient.post<Result>('/jobcode/save', params, { ...apiClient.generateFormHeaders() })
+      return apiClient.post<Result>('/jobcode/save', params, apiClient.generateFormHeaders())
     },
     getGlueHistory(jobId: number) {
       return apiClient.get<Result<JobCodeGlue[]>>(
         '/r3/support/v1/job/glue/history',
         { jobId },
-        { ...apiClient.generateFormHeaders() }
+        apiClient.generateFormHeaders()
       )
     },
   },
 
   jobGroup: {
     getRegistryNode(id: number | string) {
-      return apiClient.post<Result<JobGroup.Item>>('/jobgroup/loadById', { id }, { ...apiClient.generateFormHeaders() })
+      return apiClient.post<Result<JobGroup.Item>>('/jobgroup/loadById', { id }, apiClient.generateFormHeaders())
     },
     getJobGroups(params: JobGroup.PageParams) {
       return apiClient.post<JobGroup.PageResponse>('/jobgroup/pageList', params, apiClient.generateFormHeaders())
@@ -120,13 +118,27 @@ export default {
       return apiClient.get<Result<JobGroup.Item>>(
         '/joblog/getJobsByGroup',
         { jobGroup },
-        { ...apiClient.generateFormHeaders() }
+        apiClient.generateFormHeaders()
       )
     },
-    getLogDetails(params: Logger.LogDetailCatParams) {
-      return apiClient.post<Result<Logger.LogDetailCatResponse>>('/joblog/logDetailCat', params, {
-        ...apiClient.generateFormHeaders(),
-      })
+    getLogList(params: JobLog.PageListParams) {
+      return apiClient.get<JobLog.PageListResponse>('/joblog/pageList', params, apiClient.generateFormHeaders())
+    },
+    getLogDetailPage(id: number) {
+      return apiClient.get('/joblog/logDetailPage', { id }, apiClient.generateFormHeaders())
+    },
+    getLogDetailCat(params: JobLog.LogDetailCatParams) {
+      return apiClient.post<Result<JobLog.LogDetailCatResponse>>(
+        '/joblog/logDetailCat',
+        params,
+        apiClient.generateFormHeaders()
+      )
+    },
+    killLogPage(id: number) {
+      return apiClient.post<Result<string>>('/joblog/logKill', { id }, apiClient.generateFormHeaders())
+    },
+    clearLog(params: JobLog.ClearLogParams) {
+      return apiClient.post<Result<string>>('/joblog/clearLog', params, apiClient.generateFormHeaders())
     },
   },
 }

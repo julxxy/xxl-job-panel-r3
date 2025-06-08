@@ -43,25 +43,6 @@ export namespace User {
     password: string
     oldPassword: string
   }
-
-  export interface UserCreateParams {
-    username: string
-    password: string
-    role: number
-    permission?: string
-  }
-
-  export interface UserUpdateParams {
-    password: string
-    role: number
-    permission: string
-    id: number
-    username: string
-  }
-
-  export interface UserDeleteParams {
-    id: number
-  }
 }
 
 // 任务
@@ -118,47 +99,7 @@ export namespace Job {
     content: JobGroup[]
   }
 
-  export interface HomePageParams {
-    jobGroup?: number // 可选，可以为 -1 或其他 number
-  }
-
-  export interface HomePageResponse {
-    JobGroupList: JobGroup[]
-    jobGroup: string
-  }
-
   export type JobPageListResponse = PageResult<JobItem>
-
-  export interface RemoveJobParams {
-    id: number
-  }
-
-  export interface PauseJobParams {
-    id: number
-  }
-
-  export interface StartJobParams {
-    id: number
-  }
-
-  export interface StopJobParams {
-    id: number
-  }
-}
-
-export namespace Trigger {
-  export interface TriggerJobParams {
-    id: number
-    executorParam: string
-    addressList: string
-  }
-
-  export interface NextTriggerTimeParams {
-    scheduleType: string
-    scheduleConf: string
-  }
-
-  export type NextTriggerTimeResponse = Result<string[]>
 }
 
 // 执行器
@@ -189,26 +130,11 @@ export namespace JobGroup {
   }
 
   export type PageResponse = PageResult<Item>
-  export type LoadJobGroupResponse = Result<Item>
-}
-
-export namespace JobLog {
-  export interface JobHome {
-    jobId?: number
-  }
-
-  export interface JobGroup {
-    jobGroup?: number
-  }
-
-  export interface JobGroupResponse {
-    jobList?: Job.JobItem[]
-  }
 }
 
 // 任务日志
-export namespace Logger {
-  export interface LogItem {
+export namespace JobLog {
+  export interface Item {
     alarmStatus: number
     executorAddress: string
     executorFailRetryCount: number
@@ -235,17 +161,7 @@ export namespace Logger {
     filterTime: string
   }
 
-  export type PageListResponse = PageResult<LogItem>
-
-  export interface LogDetailPageParams {
-    id: number
-  }
-
-  export interface LogDetailPageResponse {
-    triggerCode: number
-    handleCode: number
-    logId: number
-  }
+  export type PageListResponse = PageResult<Item>
 
   export interface LogDetailCatParams {
     logId: number
@@ -257,10 +173,6 @@ export namespace Logger {
     fromLineNum: number
     isEnd: boolean
     toLineNum: number
-  }
-
-  export interface LogKillParams {
-    id: boolean
   }
 
   export interface ClearLogParams {
@@ -286,16 +198,8 @@ export interface JobCodeGlue {
   updateTime: string
 }
 
-export interface JobCodeHomeResponse {
-  GlueTypeEnum: string
-  jobInfo: Job.JobItem
-  jobLogGlues: JobCodeGlue[]
-}
-
 export interface ChartInfoParams {
-  // startDate: 2025-04-05 00:00:00
   startDate: string //  格式：yyyy-MM-dd HH:mm:ss
-  // endDate: 2025-05-05 23:59:59
   endDate: string
 }
 
