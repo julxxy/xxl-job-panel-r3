@@ -149,3 +149,14 @@ export const ExecutorRouteStrategyI18n: Record<ExecutorRouteStrategyEnum, string
   [ExecutorRouteStrategyEnum.BUSYOVER]: '忙碌转移',
   [ExecutorRouteStrategyEnum.LAST]: '最后一个',
 }
+
+// 注册方式
+export enum AddressType {
+  Auto = 0, // 自动注册
+  Manual = 1, // 手动录入
+}
+
+export const AddressTypeLabel: Record<AddressType, string> = {
+  [AddressType.Auto]: '自动注册',
+  [AddressType.Manual]: '手动录入',
+}

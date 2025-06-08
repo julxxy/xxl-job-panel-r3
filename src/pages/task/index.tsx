@@ -20,12 +20,13 @@ import TaskModalPrimary, { handleToastMsg } from '@/pages/task/TaskModalPrimary'
 import dayjs from 'dayjs'
 import { RegistryNodeModal } from '@/pages/task/RegistryNodeModal.tsx'
 import { getGlueTypeDesc, GlueTypeEnum } from '@/types/enum.ts'
+import { handleCopy } from '@/utils'
 
 /**
  * 任务管理
  */
 export default function TaskManageComponent() {
-  const [form] = useForm<Job.PageListParams>()
+  const [form] = useForm<Job.JobGroupRequestParams>()
   const [ids, setIds] = useState<number[]>([])
   const [action, setAction] = useState<IAction>('create')
   const { confirm, dialog } = useConfirmDialog()
@@ -76,7 +77,7 @@ export default function TaskManageComponent() {
     {
       type: 'select',
       key: 'jobGroup',
-      label: '执行器分组',
+      label: '所属执行器',
       placeholder: '请选择执行器',
       options: [{ label: '全部', value: -1 }, ...jobGroupOptions],
     },
@@ -111,29 +112,18 @@ export default function TaskManageComponent() {
   ]
 
   const columns: ColumnsType<Job.JobItem> = [
-    { title: 'ID', dataIndex: 'id', fixed: 'left' },
-    { title: '任务描述', dataIndex: 'jobDesc' },
+    { title: '任务ID', dataIndex: 'id', fixed: 'left', hidden: false },
+    { title: '任务名称', dataIndex: 'jobDesc' },
     {
-      title: '执行器',
+      title: '所属执行器',
       dataIndex: 'jobGroup',
       render: (_: any, record: Job.JobItem) => {
         return jobGroupMap.get(Number(record.jobGroup)) ?? '未知'
       },
     },
     {
-      title: '调度类型',
-      render: (record: Job.JobItem) => {
-        switch (record.scheduleType) {
-          case 'NONE':
-            return '无'
-          case 'CRON':
-            return `CRON: ${record.scheduleConf}`
-          case 'FIX_RATE':
-            return record.scheduleConf
-          default:
-            return '未知'
-        }
-      },
+      title: '调度计划',
+      render: renderSchedulePlan,
     },
     {
       title: '运行模式',
@@ -144,7 +134,7 @@ export default function TaskManageComponent() {
     },
     { title: '负责人', dataIndex: 'author' },
     {
-      title: '状态',
+      title: '任务状态',
       render: (record: Job.JobItem) => {
         const statusMap: Record<number, { className: string; text: string }> = {
           1: { className: 'bg-green-200 text-green-700', text: '运行中' }, // RUNNING
@@ -214,6 +204,31 @@ export default function TaskManageComponent() {
     const { code, msg } = await api.job.startJob(id)
     handleToastMsg(code, msg)
     search.submit()
+  }
+
+  // 调度计划渲染方法
+  function renderSchedulePlan(record: Job.JobItem) {
+    switch (record.scheduleType) {
+      case 'NONE':
+        return <span className="text-gray-400">无</span>
+      case 'CRON':
+        return (
+          <span>
+            <span className="text-gray-700 mr-1">Cron:</span>
+            <span
+              className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded cursor-pointer hover:bg-gray-200 transition"
+              title="点击复制 CRON 表达式"
+              onClick={e => handleCopy(record.scheduleConf, e)}
+            >
+              {record.scheduleConf}
+            </span>
+          </span>
+        )
+      case 'FIX_RATE':
+        return <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{record.scheduleConf}</span>
+      default:
+        return <span className="text-gray-400">未知</span>
+    }
   }
 
   async function handleRunOnce({
@@ -320,13 +335,13 @@ export default function TaskManageComponent() {
 
   const fetchData = async (
     { current, pageSize }: { current: number; pageSize: number },
-    formData: Job.PageListParams
+    formData: Job.JobGroupRequestParams
   ) => {
     try {
       const res = await api.job.getJobInfoList({
         jobGroup: formData.jobGroup,
         triggerStatus: formData.triggerStatus,
-        start: current - 1,
+        start: (current - 1) * pageSize,
         length: pageSize,
         jobDesc: formData.jobDesc || '',
         executorHandler: formData.executorHandler || '',

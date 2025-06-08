@@ -58,7 +58,7 @@ export default function UserComponent() {
     { current, pageSize }: { current: number; pageSize: number },
     formData: User.UserPageQuery
   ) => {
-    const res = await api.user.getUserList({ ...formData, start: current - 1, length: pageSize })
+    const res = await api.user.getUserList({ ...formData, start: (current - 1) * pageSize, length: pageSize })
     return {
       total: res?.recordsTotal ?? 0,
       list: res?.data ?? [],

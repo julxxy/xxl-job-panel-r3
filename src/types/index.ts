@@ -94,7 +94,7 @@ export namespace Job {
     _jobGroupOptions: any[]
   }
 
-  export interface JobGroupInfo {
+  export interface JobGroup {
     id: number
     appname: string
     title: string
@@ -104,7 +104,7 @@ export namespace Job {
     registryList?: string[] // 可由 addressList 派生
   }
 
-  export interface PageListParams {
+  export interface JobGroupRequestParams {
     author: string | ''
     executorHandler: string | ''
     jobDesc: string
@@ -114,8 +114,8 @@ export namespace Job {
     triggerStatus: number
   }
 
-  export interface JobGroupInfoPermissions extends Result {
-    content: JobGroupInfo[]
+  export interface JobGroupPermissions extends Result {
+    content: JobGroup[]
   }
 
   export interface HomePageParams {
@@ -123,11 +123,11 @@ export namespace Job {
   }
 
   export interface HomePageResponse {
-    JobGroupList: JobGroupInfo[]
+    JobGroupList: JobGroup[]
     jobGroup: string
   }
 
-  export type PageListResponse = PageResult<JobItem>
+  export type JobPageListResponse = PageResult<JobItem>
 
   export interface RemoveJobParams {
     id: number
@@ -161,9 +161,10 @@ export namespace Trigger {
   export type NextTriggerTimeResponse = Result<string[]>
 }
 
+// 执行器
 export namespace JobGroup {
   export interface Item {
-    id?: number // 可选，新增时可能没有
+    id: number // 可选，新增时可能没有
     appname: string // 应用名，长度 4~64，不能含有 <>，必填
     title: string // 标题，不能含有 <>，必填
     addressType: 0 | 1 // 0=自动注册，1=手动录入
@@ -172,15 +173,22 @@ export namespace JobGroup {
     registryList?: string[] // 前端可解析字段
   }
 
-  export interface JobGroupPageParams {
+  export interface PageParams {
     start?: number // 默认 0
     length?: number // 默认 10
     appname: string
     title: string
   }
 
-  export type JobGroupPageResponse = PageResult<Item>
-  export type EditJobGroup = Item
+  export interface EditJobGroup {
+    id: number | undefined // 可选，新增时可能没有
+    appname: string // 应用名，长度 4~64，不能含有 <>，必填
+    title: string // 标题，不能含有 <>，必填
+    addressType: 0 | 1 // 0=自动注册，1=手动录入
+    addressList?: string // 多地址逗号分隔，仅当 addressType != 0 时必填
+  }
+
+  export type PageResponse = PageResult<Item>
   export type LoadJobGroupResponse = Result<Item>
 }
 
