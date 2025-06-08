@@ -1,28 +1,22 @@
 import { useForm } from 'antd/es/form/Form'
-import { User } from '@/types'
-import { useRef, useState } from 'react'
-import { IAction, ModalAction } from '@/types/modal.ts'
+import { Logger } from '@/types'
+import { useState } from 'react'
+import { IAction } from '@/types/modal.ts'
 import { useConfirmDialog } from '@/hooks/useConfirmDialog.tsx'
-import { isDebugEnable, log } from '@/common/Logger.ts'
-import LoggerPageList from '@/pages/logger/LoggerPageList.tsx'
 
-export default function LogViewerComponent() {
-  const [form] = useForm<User.UserPageQuery>()
+/**
+ * 日志管理
+ */
+export default function LoggerComponent() {
+  const [form] = useForm<Logger.LogItem>()
   const [action, setAction] = useState<IAction>('create')
+  const [loading, setLoading] = useState(false)
   const { confirm, dialog } = useConfirmDialog()
-
-  const modalRef = useRef<ModalAction>({
-    openModal: (action, data) => {
-      if (isDebugEnable) log.info('打开弹窗:', action, data)
-      setAction(action)
-    },
-  })
-
-  function onRefresh() {}
 
   return (
     <div>
-      <LoggerPageList />
+      <div>日志</div>
+      {dialog}
     </div>
   )
 }
