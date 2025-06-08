@@ -69,7 +69,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
     value: value as GlueTypeEnum,
   }))
   const historyModalRef = useRef<HTMLDivElement>(null)
-  const confCacheRef = useRef<{ [k: string]: string }>({})
+  const confCacheRef = useRef<{ [k: string]: string }>({}) // scheduleType 可能为 CRON、FIX_RATE、NONE
   const [prevType, setPrevType] = useState(scheduleType)
 
   // 暴露方法给父组件
