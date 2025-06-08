@@ -69,6 +69,8 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
     value: value as GlueTypeEnum,
   }))
   const historyModalRef = useRef<HTMLDivElement>(null)
+  const confCacheRef = useRef<{ [k: string]: string }>({})
+  const [prevType, setPrevType] = useState(scheduleType)
 
   // 暴露方法给父组件
   useImperativeHandle(parentRef, () => ({
@@ -228,6 +230,19 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
       setIsGlueSourceChanged(action === 'create')
     }
   }, [form, glueType, action])
+
+  useEffect(() => {
+    // 离开前缓存当前类型的值
+    if (prevType) {
+      confCacheRef.current[prevType] = form.getFieldValue('scheduleConf') || ''
+    }
+    // 切换后恢复目标类型的缓存
+    form.setFieldsValue({
+      scheduleConf: confCacheRef.current[scheduleType] ?? '',
+    })
+    setPrevType(scheduleType)
+    // eslint-disable-next-line
+  }, [scheduleType])
 
   return (
     <>

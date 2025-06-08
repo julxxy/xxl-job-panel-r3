@@ -35,17 +35,6 @@ export const ExecutorNode: React.FC<NodeListProps> = ({ nodes = [], showMore }) 
   // 2个及以上节点
   return (
     <div className="flex flex-col gap-1">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Badge
-            className="bg-green-300 text-green-700 hover:bg-green-400 rounded-full px-3 py-1 w-fit cursor-pointer"
-            onClick={() => handleCopy(nodes[0])}
-          >
-            {nodes[0]}
-          </Badge>
-        </TooltipTrigger>
-        <TooltipContent>点击复制</TooltipContent>
-      </Tooltip>
       <div className="flex items-center gap-2">
         <Tooltip>
           <TooltipTrigger asChild>
@@ -53,12 +42,12 @@ export const ExecutorNode: React.FC<NodeListProps> = ({ nodes = [], showMore }) 
               className="bg-green-300 text-green-700 hover:bg-green-400 rounded-full px-3 py-1 w-fit cursor-pointer"
               onClick={() => handleCopy(nodes[1])}
             >
-              {nodes[1]}
+              {nodes[0]}
             </Badge>
           </TooltipTrigger>
           <TooltipContent>点击复制</TooltipContent>
         </Tooltip>
-        {nodes.length > 2 && (
+        {nodes.length > 1 && (
           <Tooltip>
             <TooltipTrigger asChild>
               <IconTooltipButton
