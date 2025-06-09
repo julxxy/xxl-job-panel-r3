@@ -78,10 +78,6 @@ export function SearchBar({ fields, form, initialValues, onSearch, onReset, onCh
   // 预设时间区间
   const rangePresets: RangePickerProps['presets'] = [
     {
-      label: <span aria-label="当前~今日结束">当前~今日结束</span>,
-      value: () => [dayjs(), dayjs().endOf('day')],
-    },
-    {
       label: '近1小时',
       value: [dayjs().subtract(1, 'hour'), dayjs()],
     },
