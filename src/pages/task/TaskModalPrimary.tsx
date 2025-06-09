@@ -232,16 +232,15 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
   }, [form, glueType, action])
 
   useEffect(() => {
-    // 离开前缓存当前类型的值
-    if (prevType) {
+    if (action === 'edit' && scheduleType !== prevType) {
+      // 离开前缓存
       confCacheRef.current[prevType] = form.getFieldValue('scheduleConf') || ''
+      // 恢复目标类型的缓存
+      form.setFieldsValue({
+        scheduleConf: confCacheRef.current[scheduleType] || '',
+      })
+      setPrevType(scheduleType)
     }
-    // 切换后恢复目标类型的缓存
-    form.setFieldsValue({
-      scheduleConf: confCacheRef.current[scheduleType] ?? '',
-    })
-    setPrevType(scheduleType)
-    // eslint-disable-next-line
   }, [scheduleType])
 
   return (
@@ -315,6 +314,7 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
                     <Select
                       placeholder="请选择类型"
                       disabled={disabled}
+                      defaultValue="NONE"
                       options={[
                         { label: '无', value: 'NONE' },
                         { label: 'CRON', value: 'CRON' },
