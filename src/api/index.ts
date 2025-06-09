@@ -122,10 +122,10 @@ export default {
       )
     },
     getLogList(params: JobLog.PageListParams) {
-      return apiClient.get<JobLog.PageListResponse>('/joblog/pageList', params, apiClient.generateFormHeaders())
+      return apiClient.post<JobLog.PageListResponse>('/joblog/pageList', params, apiClient.generateFormHeaders())
     },
     getLogDetailPage(id: number) {
-      return apiClient.get('/joblog/logDetailPage', { id }, apiClient.generateFormHeaders())
+      return apiClient.post('/joblog/logDetailPage', { id }, apiClient.generateFormHeaders())
     },
     getLogDetailCat(params: JobLog.LogDetailCatParams) {
       return apiClient.post<Result<JobLog.LogDetailCatResponse>>(
