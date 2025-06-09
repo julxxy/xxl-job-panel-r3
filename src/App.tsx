@@ -8,7 +8,7 @@ import { isDebugEnable, log } from '@/common/Logger.ts'
 import { Environment } from '@/types/enum.ts'
 import { App as AntdApp, ConfigProvider, theme } from 'antd'
 import useZustandStore from '@/stores/useZustandStore.ts'
-import AntdProvider, { antdTheme } from '@/common/AntdProvider.ts'
+import AntdProvider, { useAntdThemeToken } from '@/common/AntdProvider.ts'
 import zhCN from 'antd/lib/locale/zh_CN'
 import enUS from 'antd/lib/locale/en_US'
 import 'dayjs/locale/zh-cn'
@@ -19,13 +19,13 @@ if (isDebugEnable) log.debug(`Debug enabled on '${Environment.current}' mode.`)
 
 function App() {
   const { isDarkEnable } = useZustandStore()
-
+  const themeToken = useAntdThemeToken()
   return (
     <ThemeProvider defaultTheme={isDarkEnable ? 'dark' : 'light'} storageKey="vite-ui-theme">
       <Toaster />
       {/* 尽可能减少 Antd 覆盖范围 */}
       <ConfigProvider
-        theme={{ ...antdTheme, algorithm: isDarkEnable ? theme.darkAlgorithm : theme.defaultAlgorithm }}
+        theme={{ ...themeToken, algorithm: isDarkEnable ? theme.darkAlgorithm : theme.defaultAlgorithm }}
         locale={Environment.isLocaleCN() ? zhCN : enUS}
       >
         <AntdApp>

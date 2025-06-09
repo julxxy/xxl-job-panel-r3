@@ -8,7 +8,7 @@ export interface Result<T = any> {
   content?: T
 }
 
-// 分页
+// 分页包装
 export interface PageResult<T = any> {
   recordsTotal: number
   recordsFiltered: number
@@ -155,9 +155,9 @@ export namespace JobLog {
   export interface PageListParams {
     start?: number // 默认值是 0，可选
     length?: number // 默认值是 10，可选
-    jobGroup: number
-    jobId: number
-    logStatus: number
+    jobGroup: number | string
+    jobId: number | string
+    logStatus: number | string
     filterTime: string
   }
 

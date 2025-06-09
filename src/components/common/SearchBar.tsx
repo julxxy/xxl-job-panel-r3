@@ -1,8 +1,11 @@
-import { DatePicker, Form, Input, Select } from 'antd'
+import { DatePicker, Form, Input, Select, TimeRangePickerProps } from 'antd'
 import { DownOutlined, UpOutlined } from '@ant-design/icons'
 import { Button } from '@/components/ui/button'
 import React, { FormEventHandler, MouseEventHandler, useState } from 'react'
 import { RotateCcw, SearchIcon } from 'lucide-react'
+import dayjs, { Dayjs } from 'dayjs'
+import { isDebugEnable, log } from '@/common/Logger.ts'
+import { RangePickerProps } from 'antd/es/date-picker'
 
 const { RangePicker } = DatePicker
 
@@ -23,7 +26,12 @@ export type SearchField =
   | {
       type: 'rangePicker'
       key: string
-      label?: string
+      label?: string | '日期范围'
+      placeholder?: ['开始日期', '结束日期']
+      timeFormat?: string | 'YYYY/MM/DD HH:mm:ss' | 'YYYY-MM-DD HH:mm:ss'
+      showTime?: boolean
+      showPresets?: boolean
+      rangePresets?: TimeRangePickerProps['presets']
     }
 
 export type ActionButton = {
@@ -58,6 +66,55 @@ export function SearchBar({ fields, form, initialValues, onSearch, onReset, onCh
   const [expand, setExpand] = useState(false)
   const needExpand = fields.length > 2
 
+  const handleRangeChange = (dates: null | (Dayjs | null)[], dateStrings: string[]) => {
+    if (dates) {
+      if (isDebugEnable) log.debug('From: ', dates[0], ', to: ', dates[1])
+      if (isDebugEnable) log.debug('From: ', dateStrings[0], ', to: ', dateStrings[1])
+    } else {
+      if (isDebugEnable) log.debug('Clear')
+    }
+  }
+
+  // 预设时间区间
+  const rangePresets: RangePickerProps['presets'] = [
+    {
+      label: <span aria-label="当前~今日结束">当前~今日结束</span>,
+      value: () => [dayjs(), dayjs().endOf('day')],
+    },
+    {
+      label: '近1小时',
+      value: [dayjs().subtract(1, 'hour'), dayjs()],
+    },
+    {
+      label: '昨天',
+      value: [dayjs().subtract(1, 'day').startOf('day'), dayjs().subtract(1, 'day').endOf('day')],
+    },
+    {
+      label: '近7天',
+      value: [dayjs().subtract(7, 'day').startOf('day'), dayjs()],
+    },
+    {
+      label: '近14天',
+      value: [dayjs().subtract(14, 'day').startOf('day'), dayjs()],
+    },
+    {
+      label: '近30天',
+      value: [dayjs().subtract(30, 'day').startOf('day'), dayjs()],
+    },
+    {
+      label: '近90天',
+      value: [dayjs().subtract(90, 'day').startOf('day'), dayjs()],
+    },
+    {
+      label: '近180天',
+      value: [dayjs().subtract(180, 'day').startOf('day'), dayjs()],
+    },
+    {
+      label: '近365天',
+      value: [dayjs().subtract(365, 'day').startOf('day'), dayjs()],
+    },
+  ]
+
   const renderField = (field: SearchField) => (
     <Form.Item name={field.key} label={field.label} className="w-full" style={{ marginBottom: 0 }}>
       {(() => {
@@ -81,8 +138,28 @@ export function SearchBar({ fields, form, initialValues, onSearch, onReset, onCh
                 }}
               />
             )
-          case 'rangePicker':
-            return <RangePicker className="w-full" />
+          case 'rangePicker': {
+            // 计算是否显示预设
+            const shouldShowPresets = !!field.showPresets
+            const hasCustomPresets = Array.isArray(field.rangePresets) && field.rangePresets.length > 0
+
+            const presets: RangePickerProps['presets'] | undefined = shouldShowPresets
+              ? hasCustomPresets
+                ? field.rangePresets
+                : rangePresets
+              : undefined
+
+            return (
+              <RangePicker
+                {...(presets ? { presets } : {})}
+                className="w-full"
+                onChange={handleRangeChange}
+                showTime={field.showTime}
+                format={field.timeFormat}
+                placeholder={field.placeholder || ['开始日期', '结束日期']}
+              />
+            )
+          }
           default:
             return null
         }

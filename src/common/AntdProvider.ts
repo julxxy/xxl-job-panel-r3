@@ -24,10 +24,22 @@ export default function AntdProvider(): null {
   return null
 }
 
-const antdTheme: ThemeConfig = {
-  token: {
-    // 主题 token
-  },
+/**
+ * AntD global theme variables（使其符合 Shadcn UI + tailwindcss 风格）
+ */
+
+const useAntdThemeToken = (): ThemeConfig => {
+  const cssVariableValue = (variable: string) =>
+    getComputedStyle(document.documentElement).getPropertyValue(variable).trim()
+
+  return {
+    token: {
+      colorSuccess: cssVariableValue('--color-success'),
+      colorError: cssVariableValue('--color-failed'),
+      colorPrimary: cssVariableValue('--color-primary'),
+      borderRadius: parseFloat(cssVariableValue('--radius-md')) || 6,
+    },
+  }
 }
 
-export { message, notification, modal, antdTheme }
+export { message, notification, modal, useAntdThemeToken }
