@@ -1,6 +1,6 @@
 import { useForm } from 'antd/es/form/Form'
-import { JobLog } from '@/types'
-import React, { useCallback, useState } from 'react'
+import { Job, JobLog } from '@/types'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useConfirmDialog } from '@/hooks/useConfirmDialog.tsx'
 import api from '@/api'
 import { toast } from '@/utils/toast.ts'
@@ -8,7 +8,7 @@ import { useAntdTable } from 'ahooks'
 import { isDebugEnable, log } from '@/common/Logger.ts'
 import { SearchBar, SearchField } from '@/components/common/SearchBar.tsx'
 import { TrashIcon } from '@radix-ui/react-icons'
-import { Table, Tooltip } from 'antd'
+import { Form, Table, Tooltip } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Button } from '@/components/ui/button.tsx'
 import dayjs from 'dayjs'
@@ -18,21 +18,12 @@ import dayjs from 'dayjs'
  */
 export default function LoggerComponent() {
   const [form] = useForm<JobLog.Item>()
+  const jobGroup = Form.useWatch('jobGroup', form) as number
   const [ids, setIds] = useState<number[]>([])
-  // @ts-expect-error
-  const [loading, setLoading] = useState(false)
   const { confirm, dialog } = useConfirmDialog()
-  // @ts-expect-error
   const [jobGroupOptions, setJobGroupOptions] = useState<{ label: string; value: number }[]>([])
+  const [jobInfoOptions, setJobInfoOptions] = useState<{ label: string; value: number }[]>([])
 
-  const searchInitialValues: JobLog.PageListParams = {
-    start: 0,
-    length: 10,
-    jobGroup: '',
-    jobId: '',
-    logStatus: '',
-    filterTime: '',
-  }
   const searchFields: SearchField[] = [
     {
       type: 'select',
@@ -45,10 +36,7 @@ export default function LoggerComponent() {
       type: 'select',
       key: 'jobId',
       label: '任务名称',
-      options: [
-        { label: '全部', value: '' },
-        // todo
-      ],
+      options: [{ label: '全部', value: 0 }, ...jobInfoOptions],
     },
     {
       type: 'select',
@@ -56,8 +44,9 @@ export default function LoggerComponent() {
       label: '任务状态',
       options: [
         { label: '全部', value: -1 },
-        { label: '运行中', value: 1 },
-        { label: '已停止', value: 0 },
+        { label: '运行中', value: 3 },
+        { label: '执行成功', value: 1 },
+        { label: '执行失败', value: 2 },
       ],
     },
     {
@@ -71,6 +60,60 @@ export default function LoggerComponent() {
     },
   ]
 
+  function renderTriggerMsg(msg: string) {
+    return (
+      <Tooltip
+        title={
+          <div
+            className="max-w-[400px] whitespace-pre-line break-all text-[13px] leading-[1.6] p-2.5"
+            dangerouslySetInnerHTML={{ __html: msg || '-' }}
+          />
+        }
+        placement="topLeft"
+        styles={{ root: { maxWidth: 400 } }}
+      >
+        <span
+          className="truncate block max-w-[220px] text-gray-700 dark:text-gray-300"
+          style={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: 'block',
+          }}
+          dangerouslySetInnerHTML={{ __html: (msg || '-').replace(/<br\s*\/?>/gi, ' ') }}
+        />
+      </Tooltip>
+    )
+  }
+
+  function renderHandleMsg(msg: string) {
+    return msg ? (
+      <Tooltip
+        title={
+          <div
+            className="max-w-[400px] whitespace-pre-line break-all text-[13px] leading-[1.6] p-2.5"
+            dangerouslySetInnerHTML={{ __html: msg || '-' }}
+          />
+        }
+        placement="topLeft"
+        styles={{ root: { maxWidth: 400 } }}
+      >
+        <span
+          className="truncate block max-w-[220px] text-gray-700 dark:text-gray-300"
+          style={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: 'block',
+          }}
+          dangerouslySetInnerHTML={{ __html: (msg || '-').replace(/<br\s*\/?>/gi, ' ') }}
+        />
+      </Tooltip>
+    ) : (
+      <span className="text-gray-400">-</span>
+    )
+  }
+
   const columns: ColumnsType<JobLog.Item> = [
     {
       title: '任务ID',
@@ -83,7 +126,7 @@ export default function LoggerComponent() {
       dataIndex: 'triggerTime',
       width: 170,
       align: 'center',
-      render: (val: string) => (val ? dayjs(val).format('YYYY-MM-DD HH:mm:ss') : '-'),
+      render: (val: string) => (val ? dayjs(val).format('YYYY/MM/DD HH:mm:ss') : '-'),
     },
     {
       title: '调度结果',
@@ -96,22 +139,15 @@ export default function LoggerComponent() {
     {
       title: '调度备注',
       dataIndex: 'triggerMsg',
-      width: 220,
-      render: (msg: string) => (
-        <Tooltip title={<span dangerouslySetInnerHTML={{ __html: msg }} />} placement="topLeft">
-          <span
-            className="truncate block max-w-[200px]"
-            dangerouslySetInnerHTML={{ __html: msg.replace(/<br>/g, ' ') }}
-          />
-        </Tooltip>
-      ),
+      width: 240,
+      render: (msg: string) => renderTriggerMsg(msg),
     },
     {
       title: '执行时间',
       dataIndex: 'handleTime',
       width: 170,
       align: 'center',
-      render: (val: string) => (val ? dayjs(val).format('YYYY-MM-DD HH:mm:ss') : '-'),
+      render: (val: string) => (val ? dayjs(val).format('YYYY/MM/DD HH:mm:ss') : '-'),
     },
     {
       title: '执行结果',
@@ -130,15 +166,8 @@ export default function LoggerComponent() {
     {
       title: '执行备注',
       dataIndex: 'handleMsg',
-      width: 220,
-      render: (msg: string) =>
-        msg ? (
-          <Tooltip title={msg} placement="topLeft">
-            <span className="truncate block max-w-[200px]">{msg}</span>
-          </Tooltip>
-        ) : (
-          <span className="text-gray-400">-</span>
-        ),
+      width: 200,
+      render: (msg: string) => renderHandleMsg(msg),
     },
     {
       title: '操作',
@@ -160,21 +189,60 @@ export default function LoggerComponent() {
     },
   ]
 
+  const getJobGroupOptions = async () => {
+    try {
+      const { content } = await api.user.getUserGroupPermissions()
+      log.info('用户组执行器权限:', content)
+
+      // 使用 map 返回新的数组
+      const options = (content || []).map(({ id, title }) => ({
+        label: `${title}`,
+        value: id,
+      }))
+
+      const sortedOptions = [...options].sort((a, b) => a.value - b.value)
+      setJobGroupOptions(sortedOptions)
+    } catch (error) {
+      if (isDebugEnable) log.error('获取用户组权限失败:', error)
+    }
+  }
+
+  const getJobInfoOptions = async () => {
+    try {
+      const { content } = await api.logger.getJobsByGroup(jobGroup)
+      log.info('用户组执行器权限:', content)
+      // 使用 map 返回新的数组
+      const options = (content || []).map(({ id, jobDesc }: Job.JobItem) => ({
+        label: `${jobDesc}`,
+        value: id,
+      }))
+      const sortedOptions = [...options].sort((a, b) => a.value - b.value)
+      setJobInfoOptions(sortedOptions)
+    } catch (error) {
+      if (isDebugEnable) log.error('获取用户组权限失败:', error)
+    }
+  }
+
   const fetchData = async (
     { current, pageSize }: { current: number; pageSize: number },
     formData: JobLog.PageListParams
   ) => {
     try {
-      const filterTime = formData.filterTime
+      let filterTime = formData.filterTime || getDefaultFilterTimeRange()
       if (Array.isArray(filterTime) && filterTime.length === 2 && filterTime[0] && filterTime[1]) {
-        formData.filterTime =
-          filterTime[0].format('YYYY-MM-DD HH:mm:ss') + ' - ' + filterTime[1].format('YYYY-MM-DD HH:mm:ss')
+        filterTime = filterTime[0].format('YYYY-MM-DD HH:mm:ss') + ' - ' + filterTime[1].format('YYYY-MM-DD HH:mm:ss')
+      } else {
+        filterTime = getDefaultFilterTime()
       }
-      const res = await api.logger.getLogList({
-        ...formData,
-        length: pageSize,
+      const params: JobLog.PageListParams = {
+        jobGroup: formData.jobGroup || 0,
+        jobId: formData.jobId || 0,
+        logStatus: formData.logStatus || -1,
+        filterTime,
         start: (current - 1) * pageSize,
-      })
+        length: pageSize,
+      }
+      const res = await api.logger.getLogList(params)
       return {
         total: res?.recordsTotal ?? 0,
         list: res?.data ?? [],
@@ -199,7 +267,8 @@ export default function LoggerComponent() {
     showTotal: (total: any) => `共 ${total} 条`,
   }
 
-  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   const confirmDelete = useCallback(
     (ids: number[], message: string) => {
       confirm({
@@ -215,6 +284,19 @@ export default function LoggerComponent() {
     [confirm, search]
   )
 
+  // 获取默认时间范围
+  function getDefaultFilterTime() {
+    const now = dayjs()
+    const startOfDay = now.startOf('day')
+    return startOfDay.format('YYYY-MM-DD HH:mm:ss') + ' - ' + now.format('YYYY-MM-DD HH:mm:ss')
+  }
+
+  function getDefaultFilterTimeRange() {
+    const now = dayjs()
+    const startOfDay = now.startOf('day')
+    return [startOfDay, now]
+  }
+
   function handleReset() {
     if (isDebugEnable) log.debug('handle-reset')
     form.resetFields()
@@ -226,12 +308,30 @@ export default function LoggerComponent() {
     // todo
   }
 
+  useEffect(() => {
+    getJobGroupOptions()
+  }, [])
+
+  useEffect(() => {
+    if (jobGroup) {
+      form.setFieldValue('jobId', 0)
+      getJobInfoOptions()
+    }
+  }, [jobGroup])
+
   return (
     <div className={'content-area'}>
       <SearchBar
         form={form}
         fields={searchFields}
-        initialValues={searchInitialValues}
+        initialValues={{
+          start: 0,
+          length: 10,
+          jobGroup: '',
+          jobId: '',
+          logStatus: -1,
+          filterTime: getDefaultFilterTimeRange(),
+        }}
         onSearch={search.submit}
         onReset={handleReset}
         buttons={[

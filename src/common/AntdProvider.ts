@@ -34,9 +34,6 @@ const useAntdThemeToken = (): ThemeConfig => {
 
   return {
     token: {
-      colorSuccess: cssVariableValue('--color-success'),
-      colorError: cssVariableValue('--color-failed'),
-      colorPrimary: cssVariableValue('--color-primary'),
       borderRadius: parseFloat(cssVariableValue('--radius-md')) || 6,
     },
   }

@@ -36,7 +36,7 @@ function getTitleText(action: IAction) {
 // eslint-disable-next-line react-refresh/only-export-components
 export function handleToastMsg(code: number, msg: string) {
   if (code !== 200) {
-    toast.error(msg)
+    toast.error(msg || 'Error!')
   } else {
     toast.success('SUCCESS')
   }
@@ -45,7 +45,7 @@ export function handleToastMsg(code: number, msg: string) {
 /**
  * 任务弹窗
  */
-export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) {
+export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
   const [form] = Form.useForm()
   const [open, setOpen] = useState(false)
   const [action, setAction] = useState<IAction>('create')
@@ -306,15 +306,10 @@ export default function TaskModalPrimary({ parentRef, onRefresh }: IModalProps) 
             <Card title="调度配置" variant="outlined" style={{ marginBottom: 12 }}>
               <Row gutter={16}>
                 <Col span={12}>
-                  <Form.Item
-                    label="调度类型"
-                    name="scheduleType"
-                    rules={[{ required: true, message: '请选择调度类型' }]}
-                  >
+                  <Form.Item label="调度类型" name="scheduleType" rules={[{ required: true }]}>
                     <Select
-                      placeholder="请选择类型"
+                      placeholder="请选择调度类型"
                       disabled={disabled}
-                      defaultValue="NONE"
                       options={[
                         { label: '无', value: 'NONE' },
                         { label: 'CRON', value: 'CRON' },
