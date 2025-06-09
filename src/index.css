@@ -148,17 +148,8 @@
 
 /* 针对 Ant Design 样式优化 */
 .antd-wrapper {
-  /*  a 标签优化：只去掉颜色  */
   a {
     color: inherit;
     text-decoration: none;
-  }
-
-  /* 按钮颜色 */
-
-  .ant-btn-primary {
-    background-color: var(--color-primary) !important;
-    border-color: var(--color-primary) !important;
-    color: var(--color-primary-foreground, #fff) !important;
   }
 }

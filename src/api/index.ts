@@ -115,7 +115,7 @@ export default {
 
   logger: {
     getJobsByGroup(jobGroup: number | string) {
-      return apiClient.get<Result<JobGroup.Item>>(
+      return apiClient.post<Result<Job.JobItem[]>>(
         '/joblog/getJobsByGroup',
         { jobGroup },
         apiClient.generateFormHeaders()

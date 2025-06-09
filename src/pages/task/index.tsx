@@ -16,7 +16,7 @@ import { DeleteIcon, EditIcon, LogsIcon, MoreHorizontal, PauseIcon, PlayIcon } f
 import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import TaskModalPrimary, { handleToastMsg } from '@/pages/task/TaskModalPrimary'
+import TaskModal, { handleToastMsg } from '@/pages/task/TaskModal.tsx'
 import dayjs from 'dayjs'
 import { RegistryNodeModal } from '@/pages/task/RegistryNodeModal.tsx'
 import { getGlueTypeDesc, GlueTypeEnum } from '@/types/enum.ts'
@@ -457,7 +457,7 @@ export default function TaskManageComponent() {
         />
       </div>
 
-      <TaskModalPrimary parentRef={modalRef} onRefresh={() => (action === 'edit' ? search.submit() : search.reset())} />
+      <TaskModal parentRef={modalRef} onRefresh={() => (action === 'edit' ? search.submit() : search.reset())} />
 
       {dialog}
     </div>
