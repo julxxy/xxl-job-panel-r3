@@ -312,10 +312,13 @@ export default function LoggerComponent() {
     getJobGroupOptions()
   }, [])
 
+  // 每次所属执行器变更，都将任务名称重置为“全部”
   useEffect(() => {
+    form.setFieldValue('jobId', 0)
     if (jobGroup) {
-      form.setFieldValue('jobId', 0)
       getJobInfoOptions()
+    } else {
+      setJobInfoOptions([])
     }
   }, [jobGroup])
 
