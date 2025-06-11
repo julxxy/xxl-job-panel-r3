@@ -1,26 +1,28 @@
 import { useForm } from 'antd/es/form/Form'
 import { Job, JobLog } from '@/types'
-import React, { useCallback, useEffect, useState } from 'react'
-import { useConfirmDialog } from '@/hooks/useConfirmDialog.tsx'
+import React, { useEffect, useState } from 'react'
 import api from '@/api'
-import { toast } from '@/utils/toast.ts'
 import { useAntdTable } from 'ahooks'
 import { isDebugEnable, log } from '@/common/Logger.ts'
 import { SearchBar, SearchField } from '@/components/common/SearchBar.tsx'
-import { TrashIcon } from '@radix-ui/react-icons'
-import { Form, Table, Tooltip } from 'antd'
+import { Form, Input, Radio, Table, Tooltip } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Button } from '@/components/ui/button.tsx'
 import dayjs from 'dayjs'
+import { ClearOutlined } from '@ant-design/icons'
+import { ShadcnAntdModal } from '@/components/ShadcnAntdModal.tsx'
+import { Card } from '@/components/ui/card.tsx'
+import { toast } from '@/utils/toast.ts'
 
 /**
  * 日志管理
  */
 export default function LoggerComponent() {
-  const [form] = useForm<JobLog.Item>()
-  const jobGroup = Form.useWatch('jobGroup', form) as number
+  const [searchForm] = useForm<JobLog.Item>()
+  const [clearForm] = useForm<any>()
+  const jobGroup = Form.useWatch('jobGroup', searchForm) as number
   const [ids, setIds] = useState<number[]>([])
-  const { confirm, dialog } = useConfirmDialog()
+  const [visible, setVisible] = useState(false)
   const [jobGroupOptions, setJobGroupOptions] = useState<{ label: string; value: number }[]>([])
   const [jobInfoOptions, setJobInfoOptions] = useState<{ label: string; value: number }[]>([])
 
@@ -30,7 +32,7 @@ export default function LoggerComponent() {
       key: 'jobGroup',
       label: '所属执行器',
       placeholder: '请选择执行器',
-      options: [{ label: '全部', value: '' }, ...jobGroupOptions],
+      options: [{ label: '全部', value: 0 }, ...jobGroupOptions],
     },
     {
       type: 'select',
@@ -57,6 +59,94 @@ export default function LoggerComponent() {
       showTime: true,
       showPresets: true,
       timeFormat: 'YYYY/MM/DD HH:mm:ss',
+    },
+  ]
+
+  const CLEAR_OPTIONS = [
+    { label: '清理一个月之前日志数据', value: '1' },
+    { label: '清理三个月之前日志数据', value: '2' },
+    { label: '清理六个月之前日志数据', value: '3' },
+    { label: '清理一年之前日志数据', value: '4' },
+    { label: '清理一千条以前日志数据', value: '5' },
+    { label: '清理一万条以前日志数据', value: '6' },
+    { label: '清理三万条以前日志数据', value: '7' },
+    { label: '清理十万条以前日志数据', value: '8' },
+    { label: '清理所有日志数据', value: '9' },
+  ]
+
+  const columns: ColumnsType<JobLog.Item> = [
+    {
+      title: '任务ID',
+      dataIndex: 'jobId',
+      width: 100,
+      fixed: 'left',
+      align: 'center',
+    },
+    {
+      title: '调度时间',
+      dataIndex: 'triggerTime',
+      width: 175,
+      align: 'center',
+      render: (val: string) => (val ? dayjs(val).format('YYYY/MM/DD HH:mm:ss') : '-'),
+    },
+    {
+      title: '调度结果',
+      dataIndex: 'triggerCode',
+      width: 100,
+      align: 'center',
+      render: (code: number) =>
+        code === 200 ? <span className="text-green-600">成功</span> : <span className="text-red-600">失败</span>,
+    },
+    {
+      title: '调度备注',
+      dataIndex: 'triggerMsg',
+      width: 220,
+      render: (msg: string) => renderTriggerMsg(msg),
+    },
+    {
+      title: '执行时间',
+      dataIndex: 'handleTime',
+      width: 175,
+      align: 'center',
+      render: (val: string) => (val ? dayjs(val).format('YYYY/MM/DD HH:mm:ss') : '-'),
+    },
+    {
+      title: '执行结果',
+      dataIndex: 'handleCode',
+      width: 100,
+      align: 'center',
+      render: (code: number) =>
+        code === 200 ? (
+          <span className="text-green-600">成功</span>
+        ) : code === 0 ? (
+          <span className="text-gray-400">-</span>
+        ) : (
+          <span className="text-red-600">失败</span>
+        ),
+    },
+    {
+      title: '执行备注',
+      dataIndex: 'handleMsg',
+      width: 200,
+      render: (msg: string) => renderHandleMsg(msg),
+    },
+    {
+      title: '操作',
+      key: 'action',
+      width: 100,
+      align: 'center',
+      render: (record: JobLog.Item) => (
+        <Button
+          variant="link"
+          size="sm"
+          onClick={() => {
+            if (isDebugEnable) log.debug('查看日志:', record)
+            // todo
+          }}
+        >
+          查看日志
+        </Button>
+      ),
     },
   ]
 
@@ -113,81 +203,6 @@ export default function LoggerComponent() {
       <span className="text-gray-400">-</span>
     )
   }
-
-  const columns: ColumnsType<JobLog.Item> = [
-    {
-      title: '任务ID',
-      dataIndex: 'jobId',
-      width: 80,
-      align: 'center',
-    },
-    {
-      title: '调度时间',
-      dataIndex: 'triggerTime',
-      width: 170,
-      align: 'center',
-      render: (val: string) => (val ? dayjs(val).format('YYYY/MM/DD HH:mm:ss') : '-'),
-    },
-    {
-      title: '调度结果',
-      dataIndex: 'triggerCode',
-      width: 100,
-      align: 'center',
-      render: (code: number) =>
-        code === 200 ? <span className="text-green-600">成功</span> : <span className="text-red-600">失败</span>,
-    },
-    {
-      title: '调度备注',
-      dataIndex: 'triggerMsg',
-      width: 240,
-      render: (msg: string) => renderTriggerMsg(msg),
-    },
-    {
-      title: '执行时间',
-      dataIndex: 'handleTime',
-      width: 170,
-      align: 'center',
-      render: (val: string) => (val ? dayjs(val).format('YYYY/MM/DD HH:mm:ss') : '-'),
-    },
-    {
-      title: '执行结果',
-      dataIndex: 'handleCode',
-      width: 100,
-      align: 'center',
-      render: (code: number) =>
-        code === 200 ? (
-          <span className="text-green-600">成功</span>
-        ) : code === 0 ? (
-          <span className="text-gray-400">-</span>
-        ) : (
-          <span className="text-red-600">失败</span>
-        ),
-    },
-    {
-      title: '执行备注',
-      dataIndex: 'handleMsg',
-      width: 200,
-      render: (msg: string) => renderHandleMsg(msg),
-    },
-    {
-      title: '操作',
-      key: 'action',
-      width: 100,
-      align: 'center',
-      render: (record: JobLog.Item) => (
-        <Button
-          variant="link"
-          size="sm"
-          onClick={() => {
-            if (isDebugEnable) log.debug('查看日志:', record)
-            // todo
-          }}
-        >
-          查看日志
-        </Button>
-      ),
-    },
-  ]
 
   const getJobGroupOptions = async () => {
     try {
@@ -257,7 +272,7 @@ export default function LoggerComponent() {
   }
 
   const { tableProps, search } = useAntdTable(fetchData, {
-    form,
+    form: searchForm,
     defaultPageSize: 10,
   })
   tableProps.pagination = {
@@ -266,23 +281,6 @@ export default function LoggerComponent() {
     showQuickJumper: false,
     showTotal: (total: any) => `共 ${total} 条`,
   }
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  const confirmDelete = useCallback(
-    (ids: number[], message: string) => {
-      confirm({
-        title: '确认删除操作？',
-        description: message,
-        onConfirm: async () => {
-          await api.logger.clearLog({} as JobLog.ClearLogParams)
-          toast.success(`${ids.length > 1 ? '批量删除成功' : '删除成功'}`)
-          search.reset()
-        },
-      })
-    },
-    [confirm, search]
-  )
 
   // 获取默认时间范围
   function getDefaultFilterTime() {
@@ -299,13 +297,27 @@ export default function LoggerComponent() {
 
   function handleReset() {
     if (isDebugEnable) log.debug('handle-reset')
-    form.resetFields()
+    searchForm.resetFields()
     search.reset()
   }
 
-  function clearLogger(): void {
+  async function handleClearLogger() {
     if (isDebugEnable) log.debug('clear-logger')
-    // todo
+    // 获取当前选中的执行器和任务名称
+    const jobGroup = searchForm.getFieldValue('jobGroup') || 0
+    const jobId = searchForm.getFieldValue('jobId') || 0
+
+    clearForm.setFieldsValue({
+      jobGroup,
+      jobId,
+    })
+
+    if (isDebugEnable) log.debug('clearParams: ', clearForm.getFieldsValue())
+    const { code } = await api.logger.clearLog(clearForm.getFieldsValue())
+    if (code === 200) toast.success('清理成功')
+    else toast.error('清理失败')
+    setVisible(false)
+    searchForm.submit()
   }
 
   useEffect(() => {
@@ -314,7 +326,7 @@ export default function LoggerComponent() {
 
   // 每次所属执行器变更，都将任务名称重置为“全部”
   useEffect(() => {
-    form.setFieldValue('jobId', 0)
+    searchForm.setFieldValue('jobId', 0)
     if (jobGroup) {
       getJobInfoOptions()
     } else {
@@ -322,16 +334,30 @@ export default function LoggerComponent() {
     }
   }, [jobGroup])
 
+  useEffect(() => {
+    if (visible) {
+      const jobGroupValue = searchForm.getFieldValue('jobGroup') || 0
+      const jobIdValue = searchForm.getFieldValue('jobId') || 0
+      const jobGroupLabel = jobGroupOptions.find(opt => opt.value === jobGroupValue)?.label || ''
+      const jobIdLabel = jobInfoOptions.find(opt => opt.value === jobIdValue)?.label || ''
+      clearForm.setFieldsValue({
+        jobGroupLabel,
+        jobIdLabel,
+        type: 0,
+      })
+    }
+  }, [visible])
+
   return (
     <div className={'content-area'}>
       <SearchBar
-        form={form}
+        form={searchForm}
         fields={searchFields}
         initialValues={{
           start: 0,
           length: 10,
-          jobGroup: '',
-          jobId: '',
+          jobGroup: 0,
+          jobId: 0,
           logStatus: -1,
           filterTime: getDefaultFilterTimeRange(),
         }}
@@ -341,8 +367,8 @@ export default function LoggerComponent() {
           {
             key: 'clearLogger',
             label: '清理日志',
-            icon: <TrashIcon />,
-            onClick: clearLogger,
+            icon: <ClearOutlined />,
+            onClick: () => setVisible(true),
           },
         ]}
       />
@@ -365,7 +391,37 @@ export default function LoggerComponent() {
         />
       </div>
 
-      {dialog}
+      <ShadcnAntdModal<JobLog.ClearLogParams>
+        title="清理日志"
+        open={visible}
+        onOk={handleClearLogger}
+        onCancel={() => setVisible(false)}
+        action={'edit'}
+        forceRender={true}
+        destroyOnHidden={true}
+      >
+        {() => (
+          <Form form={clearForm} layout="horizontal" initialValues={{ type: 0 }}>
+            <Card className="p-4">
+              <Form.Item name="jobGroupLabel" label="执行器名称">
+                <Input disabled />
+              </Form.Item>
+              <Form.Item name="jobIdLabel" label="任务名称">
+                <Input disabled />
+              </Form.Item>
+              <Form.Item name="type" label="清理方式" rules={[{ required: true, message: '请选择清理方式' }]}>
+                <Radio.Group className="grid grid-cols-2 gap-x-4">
+                  {CLEAR_OPTIONS.map(opt => (
+                    <Radio key={opt.value} value={opt.value} className="mb-2">
+                      {opt.label}
+                    </Radio>
+                  ))}
+                </Radio.Group>
+              </Form.Item>
+            </Card>
+          </Form>
+        )}
+      </ShadcnAntdModal>
     </div>
   )
 }

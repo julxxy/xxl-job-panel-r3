@@ -23,6 +23,7 @@ interface ShadModalProps<T = any> {
   style?: CSSProperties
   styles?: ModalStyles
   action?: 'create' | 'edit' | 'view'
+  forceRender?: boolean
   destroyOnHidden?: boolean
   confirmLoading?: boolean
   children: (data?: T) => React.ReactNode
@@ -47,6 +48,7 @@ export function ShadcnAntdModal<T = any>({
   style,
   styles,
   action = 'create',
+  forceRender = false,
   destroyOnHidden = true,
   confirmLoading = false,
   children,
@@ -91,6 +93,7 @@ export function ShadcnAntdModal<T = any>({
       className={clsx('rounded-md', 'w-full max-w-full', className)}
       style={style}
       styles={styles}
+      forceRender={forceRender}
       destroyOnHidden={destroyOnHidden}
     >
       <div className={clsx(contentPadding)}>{children?.(data)}</div>

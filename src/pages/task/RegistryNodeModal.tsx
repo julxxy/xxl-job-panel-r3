@@ -51,7 +51,7 @@ export function RegistryNodeModal({ jobGroupId, trigger }: RegistryNodeModalProp
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <GearIcon className="h-5 w-5" />
-            注册节点列表 ({appName})
+            注册节点列表 {appName ? <span>({appName})</span> : null}
           </DialogTitle>
         </DialogHeader>
 

@@ -176,8 +176,8 @@ export namespace JobLog {
   }
 
   export interface ClearLogParams {
-    jobGroup: number
-    jobId: number
+    jobGroup: number | string
+    jobId: number | string
     type: number
   }
 }

@@ -138,7 +138,7 @@ export default {
       return apiClient.post<Result<string>>('/joblog/logKill', { id }, apiClient.generateFormHeaders())
     },
     clearLog(params: JobLog.ClearLogParams) {
-      return apiClient.post<Result<string>>('/joblog/clearLog', params, apiClient.generateFormHeaders())
+      return apiClient.post<Result>('/joblog/clearLog', params, apiClient.generateFormHeaders())
     },
   },
 }
