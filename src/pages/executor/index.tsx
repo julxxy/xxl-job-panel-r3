@@ -176,7 +176,7 @@ export default function ExecutorComponent() {
           buttons={[
             {
               key: 'addExecutor',
-              label: '新建',
+              label: '新建执行器',
               icon: <PlusIcon />,
               onClick: () => modalRef?.current.openModal('create'),
             },

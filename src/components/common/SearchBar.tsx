@@ -82,6 +82,10 @@ export function SearchBar({ fields, form, initialValues, onSearch, onReset, onCh
       value: [dayjs().subtract(1, 'hour'), dayjs()],
     },
     {
+      label: '今天',
+      value: [dayjs().startOf('day'), dayjs().endOf('day')],
+    },
+    {
       label: '昨天',
       value: [dayjs().subtract(1, 'day').startOf('day'), dayjs().subtract(1, 'day').endOf('day')],
     },
