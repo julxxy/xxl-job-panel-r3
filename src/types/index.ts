@@ -166,12 +166,14 @@ export namespace JobLog {
   export interface LogDetailCatParams {
     logId: number
     fromLineNum: number
+    _jobGroupLabel: string
+    _jobIdLabel?: string
   }
 
   export interface LogDetailCatResponse {
     logContent: string
     fromLineNum: number
-    isEnd: boolean
+    end: boolean
     toLineNum: number
   }
 

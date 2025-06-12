@@ -1,18 +1,19 @@
 import { useForm } from 'antd/es/form/Form'
 import { Job, JobLog } from '@/types'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import api from '@/api'
 import { useAntdTable } from 'ahooks'
 import { isDebugEnable, log } from '@/common/Logger.ts'
 import { SearchBar, SearchField } from '@/components/common/SearchBar.tsx'
-import { Form, Input, Radio, Table, Tooltip } from 'antd'
+import { Card, Form, Input, Radio, Table, Tooltip } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Button } from '@/components/ui/button.tsx'
 import dayjs from 'dayjs'
 import { ClearOutlined } from '@ant-design/icons'
 import { ShadcnAntdModal } from '@/components/ShadcnAntdModal.tsx'
-import { Card } from '@/components/ui/card.tsx'
 import { toast } from '@/utils/toast.ts'
+import { ModalAction } from '@/types/modal.ts'
+import ViewLogModal from '@/pages/logger/ViewLogModal.tsx'
 
 /**
  * 日志管理
@@ -21,10 +22,32 @@ export default function LoggerComponent() {
   const [searchForm] = useForm<JobLog.Item>()
   const [clearForm] = useForm<any>()
   const jobGroup = Form.useWatch('jobGroup', searchForm) as number
+  const jobId = Form.useWatch('jobId', searchForm) as number
   const [ids, setIds] = useState<number[]>([])
   const [visible, setVisible] = useState(false)
-  const [jobGroupOptions, setJobGroupOptions] = useState<{ label: string; value: number }[]>([])
-  const [jobInfoOptions, setJobInfoOptions] = useState<{ label: string; value: number }[]>([])
+  const defaultOption = [{ value: 0, label: '全部' }]
+  const [jobGroupOptions, setJobGroupOptions] = useState<{ label: string; value: number }[]>(defaultOption)
+  const [jobInfoOptions, setJobInfoOptions] = useState<{ label: string; value: number }[]>(defaultOption)
+  const [jobIdLabel, setJobIdLabel] = useState('')
+  const [jobGroupLabel, setJobGroupLabel] = useState('')
+
+  const modalRef = useRef<ModalAction>({
+    openModal: (action, data) => {
+      if (isDebugEnable) log.info('打开弹窗:', action, data)
+    },
+  })
+
+  const CLEAR_OPTIONS = [
+    { label: '清理 1 个月之前日志数据', value: '1' },
+    { label: '清理 3 个月之前日志数据', value: '2' },
+    { label: '清理 3 个月之前日志数据', value: '3' },
+    { label: '清理 1 年之前日志数据', value: '4' },
+    { label: '清理 1 千条以前日志数据', value: '5' },
+    { label: '清理 1 万条以前日志数据', value: '6' },
+    { label: '清理 3 万条以前日志数据', value: '7' },
+    { label: '清理 10 万条以前日志数据', value: '8' },
+    { label: '清理所有日志数据', value: '9' },
+  ]
 
   const searchFields: SearchField[] = [
     {
@@ -32,13 +55,13 @@ export default function LoggerComponent() {
       key: 'jobGroup',
       label: '所属执行器',
       placeholder: '请选择执行器',
-      options: [{ label: '全部', value: 0 }, ...jobGroupOptions],
+      options: jobGroupOptions,
     },
     {
       type: 'select',
       key: 'jobId',
       label: '任务名称',
-      options: [{ label: '全部', value: 0 }, ...jobInfoOptions],
+      options: jobInfoOptions,
     },
     {
       type: 'select',
@@ -60,18 +83,6 @@ export default function LoggerComponent() {
       showPresets: true,
       timeFormat: 'YYYY/MM/DD HH:mm:ss',
     },
-  ]
-
-  const CLEAR_OPTIONS = [
-    { label: '清理一个月之前日志数据', value: '1' },
-    { label: '清理三个月之前日志数据', value: '2' },
-    { label: '清理六个月之前日志数据', value: '3' },
-    { label: '清理一年之前日志数据', value: '4' },
-    { label: '清理一千条以前日志数据', value: '5' },
-    { label: '清理一万条以前日志数据', value: '6' },
-    { label: '清理三万条以前日志数据', value: '7' },
-    { label: '清理十万条以前日志数据', value: '8' },
-    { label: '清理所有日志数据', value: '9' },
   ]
 
   const columns: ColumnsType<JobLog.Item> = [
@@ -137,12 +148,16 @@ export default function LoggerComponent() {
       align: 'center',
       render: (record: JobLog.Item) => (
         <Button
-          variant="link"
           size="sm"
-          onClick={() => {
-            if (isDebugEnable) log.debug('查看日志:', record)
-            // todo
-          }}
+          variant="link"
+          onClick={() =>
+            modalRef.current.openModal('view', {
+              logId: record.id,
+              fromLineNum: 1,
+              _jobGroupLabel: jobGroupLabel,
+              _jobIdLabel: jobIdLabel,
+            })
+          }
         >
           查看日志
         </Button>
@@ -209,30 +224,38 @@ export default function LoggerComponent() {
       const { content } = await api.user.getUserGroupPermissions()
       log.info('用户组执行器权限:', content)
 
-      // 使用 map 返回新的数组
-      const options = (content || []).map(({ id, title }) => ({
-        label: `${title}`,
-        value: id,
-      }))
+      // 过滤掉接口返回的 value 为 0 的项
+      const options = (content || [])
+        .map(({ id, title }) => ({
+          value: id,
+          label: title,
+        }))
+        .filter(opt => opt.value !== 0)
 
-      const sortedOptions = [...options].sort((a, b) => a.value - b.value)
-      setJobGroupOptions(sortedOptions)
+      // 手动将“全部”放在最前面
+      const mergedOptions = [{ value: 0, label: '全部' }, ...options]
+
+      setJobGroupOptions(mergedOptions)
     } catch (error) {
       if (isDebugEnable) log.error('获取用户组权限失败:', error)
     }
   }
 
-  const getJobInfoOptions = async () => {
+  const getJobInfoOptions = async (jobGroup: number) => {
     try {
       const { content } = await api.logger.getJobsByGroup(jobGroup)
       log.info('用户组执行器权限:', content)
-      // 使用 map 返回新的数组
-      const options = (content || []).map(({ id, jobDesc }: Job.JobItem) => ({
-        label: `${jobDesc}`,
-        value: id,
-      }))
-      const sortedOptions = [...options].sort((a, b) => a.value - b.value)
-      setJobInfoOptions(sortedOptions)
+
+      const options = (content || [])
+        .map(({ id, jobDesc }: Job.JobItem) => ({
+          value: id,
+          label: jobDesc,
+        }))
+        .filter(opt => opt.value !== 0)
+
+      const mergedOptions = [{ value: 0, label: '全部' }, ...options]
+
+      setJobInfoOptions(mergedOptions)
     } catch (error) {
       if (isDebugEnable) log.error('获取用户组权限失败:', error)
     }
@@ -249,15 +272,14 @@ export default function LoggerComponent() {
       } else {
         filterTime = getDefaultFilterTime()
       }
-      const params: JobLog.PageListParams = {
+      const res = await api.logger.getLogList({
         jobGroup: formData.jobGroup || 0,
         jobId: formData.jobId || 0,
         logStatus: formData.logStatus || -1,
         filterTime,
         start: (current - 1) * pageSize,
         length: pageSize,
-      }
-      const res = await api.logger.getLogList(params)
+      })
       return {
         total: res?.recordsTotal ?? 0,
         list: res?.data ?? [],
@@ -296,57 +318,68 @@ export default function LoggerComponent() {
   }
 
   function handleReset() {
-    if (isDebugEnable) log.debug('handle-reset')
-    searchForm.resetFields()
+    if (isDebugEnable) log.debug('handleReset')
     search.reset()
   }
 
   async function handleClearLogger() {
-    if (isDebugEnable) log.debug('clear-logger')
-    // 获取当前选中的执行器和任务名称
-    const jobGroup = searchForm.getFieldValue('jobGroup') || 0
-    const jobId = searchForm.getFieldValue('jobId') || 0
-
-    clearForm.setFieldsValue({
-      jobGroup,
-      jobId,
-    })
-
-    if (isDebugEnable) log.debug('clearParams: ', clearForm.getFieldsValue())
-    const { code } = await api.logger.clearLog(clearForm.getFieldsValue())
-    if (code === 200) toast.success('清理成功')
-    else toast.error('清理失败')
+    if (isDebugEnable) log.debug('清理日志')
+    const { jobGroup, jobId, type } = clearForm.getFieldsValue()
+    const { code } = await api.logger.clearLog({ jobGroup, jobId, type })
+    if (code === 200) toast.success('清理成功', true)
+    else toast.error('清理失败', true)
     setVisible(false)
-    searchForm.submit()
+    search.reset()
   }
 
   useEffect(() => {
     getJobGroupOptions()
   }, [])
 
-  // 每次所属执行器变更，都将任务名称重置为“全部”
   useEffect(() => {
-    searchForm.setFieldValue('jobId', 0)
     if (jobGroup) {
-      getJobInfoOptions()
+      getJobInfoOptions(jobGroup)
     } else {
-      setJobInfoOptions([])
+      setJobInfoOptions(defaultOption)
     }
   }, [jobGroup])
 
   useEffect(() => {
-    if (visible) {
-      const jobGroupValue = searchForm.getFieldValue('jobGroup') || 0
-      const jobIdValue = searchForm.getFieldValue('jobId') || 0
-      const jobGroupLabel = jobGroupOptions.find(opt => opt.value === jobGroupValue)?.label || ''
-      const jobIdLabel = jobInfoOptions.find(opt => opt.value === jobIdValue)?.label || ''
+    if (visible && jobGroupOptions.length && jobInfoOptions.length) {
+      const jobGroup = searchForm.getFieldValue('jobGroup') ?? 0
+      const jobId = searchForm.getFieldValue('jobId') ?? 0
+      const jobGroupLabel = jobGroupOptions.find(opt => opt.value === jobGroup)?.label || '全部'
+      const jobIdLabel = jobInfoOptions.find(opt => opt.value === jobId)?.label || '全部'
+      setJobIdLabel(jobIdLabel)
+      setJobGroupLabel(jobGroupLabel)
       clearForm.setFieldsValue({
+        jobGroup,
+        jobId,
+        type: '1', // 默认选中第一个
         jobGroupLabel,
         jobIdLabel,
-        type: 0,
       })
     }
-  }, [visible])
+  }, [visible, jobGroupOptions, jobInfoOptions, searchForm, clearForm])
+
+  useEffect(() => {
+    if (jobGroupOptions.length && jobInfoOptions.length) {
+      const jobGroup = searchForm.getFieldValue('jobGroup') ?? 0
+      const jobId = searchForm.getFieldValue('jobId') ?? 0
+      const jobGroupLabel = jobGroupOptions.find(opt => opt.value === jobGroup)?.label || '全部'
+      const jobIdLabel = jobInfoOptions.find(opt => opt.value === jobId)?.label || '全部'
+      setJobIdLabel(jobIdLabel)
+      setJobGroupLabel(jobGroupLabel)
+    }
+  }, [jobGroupOptions, jobInfoOptions, searchForm])
+
+  useEffect(() => {
+    if (jobId) {
+      const jobId = searchForm.getFieldValue('jobId') ?? 0
+      const jobIdLabel = jobInfoOptions.find(opt => opt.value === jobId)?.label || '全部'
+      setJobIdLabel(jobIdLabel)
+    }
+  }, [jobId])
 
   return (
     <div className={'content-area'}>
@@ -391,23 +424,29 @@ export default function LoggerComponent() {
         />
       </div>
 
+      {/* 清理日志 */}
       <ShadcnAntdModal<JobLog.ClearLogParams>
+        action="edit"
         title="清理日志"
         open={visible}
         onOk={handleClearLogger}
         onCancel={() => setVisible(false)}
-        action={'edit'}
-        forceRender={true}
         destroyOnHidden={true}
       >
         {() => (
-          <Form form={clearForm} layout="horizontal" initialValues={{ type: 0 }}>
-            <Card className="p-4">
+          <Card>
+            <Form form={clearForm} layout="horizontal" initialValues={{ type: 1 }}>
               <Form.Item name="jobGroupLabel" label="执行器名称">
                 <Input disabled />
               </Form.Item>
               <Form.Item name="jobIdLabel" label="任务名称">
                 <Input disabled />
+              </Form.Item>
+              <Form.Item name="jobGroup" style={{ display: 'none' }}>
+                <Input />
+              </Form.Item>
+              <Form.Item name="jobId" style={{ display: 'none' }}>
+                <Input />
               </Form.Item>
               <Form.Item name="type" label="清理方式" rules={[{ required: true, message: '请选择清理方式' }]}>
                 <Radio.Group className="grid grid-cols-2 gap-x-4">
@@ -418,10 +457,13 @@ export default function LoggerComponent() {
                   ))}
                 </Radio.Group>
               </Form.Item>
-            </Card>
-          </Form>
+            </Form>
+          </Card>
         )}
       </ShadcnAntdModal>
+
+      {/*查看日志*/}
+      <ViewLogModal parentRef={modalRef} onRefresh={() => search.submit()} />
     </div>
   )
 }
