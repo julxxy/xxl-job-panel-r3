@@ -1,11 +1,11 @@
 import { useForm } from 'antd/es/form/Form'
 import { Job, JobLog } from '@/types'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import api from '@/api'
 import { useAntdTable } from 'ahooks'
 import { isDebugEnable, log } from '@/common/Logger.ts'
 import { SearchBar, SearchField } from '@/components/common/SearchBar.tsx'
-import { Card, Form, Input, Radio, Table, Tooltip } from 'antd'
+import { Card, Form, Input, Radio, Space, Table, Tooltip } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Button } from '@/components/ui/button.tsx'
 import dayjs from 'dayjs'
@@ -14,6 +14,8 @@ import { ShadcnAntdModal } from '@/components/ShadcnAntdModal.tsx'
 import { toast } from '@/utils/toast.ts'
 import { ModalAction } from '@/types/modal.ts'
 import ViewLogModal from '@/pages/logger/ViewLogModal.tsx'
+import { useConfirmDialog } from '@/hooks/useConfirmDialog.tsx'
+import { Ban, ViewIcon } from 'lucide-react'
 
 /**
  * 日志管理
@@ -30,6 +32,7 @@ export default function LoggerComponent() {
   const [jobInfoOptions, setJobInfoOptions] = useState<{ label: string; value: number }[]>(defaultOption)
   const [jobIdLabel, setJobIdLabel] = useState('')
   const [jobGroupLabel, setJobGroupLabel] = useState('')
+  const { confirm, dialog } = useConfirmDialog()
 
   const modalRef = useRef<ModalAction>({
     openModal: (action, data) => {
@@ -40,7 +43,7 @@ export default function LoggerComponent() {
   const CLEAR_OPTIONS = [
     { label: '清理 1 个月之前日志数据', value: '1' },
     { label: '清理 3 个月之前日志数据', value: '2' },
-    { label: '清理 3 个月之前日志数据', value: '3' },
+    { label: '清理 6 个月之前日志数据', value: '3' },
     { label: '清理 1 年之前日志数据', value: '4' },
     { label: '清理 1 千条以前日志数据', value: '5' },
     { label: '清理 1 万条以前日志数据', value: '6' },
@@ -146,22 +149,7 @@ export default function LoggerComponent() {
       key: 'action',
       width: 100,
       align: 'center',
-      render: (record: JobLog.Item) => (
-        <Button
-          size="sm"
-          variant="link"
-          onClick={() =>
-            modalRef.current.openModal('view', {
-              logId: record.id,
-              fromLineNum: 1,
-              _jobGroupLabel: jobGroupLabel,
-              _jobIdLabel: jobIdLabel,
-            })
-          }
-        >
-          查看日志
-        </Button>
-      ),
+      render: (record: JobLog.Item) => <ActionButtons record={record} />,
     },
   ]
 
@@ -304,6 +292,45 @@ export default function LoggerComponent() {
     showTotal: (total: any) => `共 ${total} 条`,
   }
 
+  const ActionButtons = ({ record }: { record: JobLog.Item }) => {
+    const handleViewLog = () => {
+      modalRef.current.openModal('view', {
+        logId: record.id,
+        fromLineNum: 1,
+        _jobGroupLabel: jobGroupLabel,
+        _jobIdLabel: jobIdLabel,
+      })
+    }
+
+    const handleTerminate = () => {
+      handleTerminateJob(record.id)
+    }
+
+    return (
+      <Space>
+        <Tooltip title="查看日志">
+          <Button variant="ghost" size="icon" onClick={handleViewLog}>
+            <ViewIcon className="h-4 w-4" />
+          </Button>
+        </Tooltip>
+        <Tooltip title="终止任务">
+          {/* 使用一个 div 包裹 disabled 的按钮，确保 Tooltip 总是能正常触发 */}
+          <div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleTerminate}
+              disabled={record?.handleCode !== 0}
+              className="text-red-500 hover:text-red-600"
+            >
+              <Ban className="h-4 w-4" />
+            </Button>
+          </div>
+        </Tooltip>
+      </Space>
+    )
+  }
+
   // 获取默认时间范围
   function getDefaultFilterTime() {
     const now = dayjs()
@@ -331,6 +358,38 @@ export default function LoggerComponent() {
     setVisible(false)
     search.reset()
   }
+
+  async function handleTerminateJob(id: number) {
+    if (isDebugEnable) log.debug('TerminateJob: ' + id)
+    if (!id) {
+      return
+    }
+    confirmDelete(id, `将要终断任务 ${id} 的执行，中断后任务将失败，确认继续？`)
+  }
+
+  const confirmDelete = useCallback(
+    (jobId: number, message: string) => {
+      confirm({
+        title: '确认终止任务？',
+        description: message,
+        onConfirm: async () => {
+          try {
+            const { code, msg } = await api.logger.killLogPage(jobId)
+            if (code === 200) {
+              toast.success(`终止任务 [${jobId}] 成功`, true)
+            } else {
+              // 使用模板字符串正确拼接
+              toast.error(`终止任务 [${jobId}] 失败: ${msg}`, true)
+            }
+            search.reset()
+          } catch (error) {
+            toast.error(`终止任务 [${jobId}] 时发生未知错误`, true)
+          }
+        },
+      })
+    },
+    [confirm, search]
+  )
 
   useEffect(() => {
     getJobGroupOptions()
@@ -399,7 +458,7 @@ export default function LoggerComponent() {
         buttons={[
           {
             key: 'clearLogger',
-            label: '清理日志',
+            label: '日志清理',
             icon: <ClearOutlined />,
             onClick: () => setVisible(true),
           },
@@ -424,10 +483,10 @@ export default function LoggerComponent() {
         />
       </div>
 
-      {/* 清理日志 */}
+      {/* 日志清理 */}
       <ShadcnAntdModal<JobLog.ClearLogParams>
         action="edit"
-        title="清理日志"
+        title="日志清理"
         open={visible}
         onOk={handleClearLogger}
         onCancel={() => setVisible(false)}
@@ -464,6 +523,8 @@ export default function LoggerComponent() {
 
       {/*查看日志*/}
       <ViewLogModal parentRef={modalRef} onRefresh={() => search.submit()} />
+
+      {dialog}
     </div>
   )
 }

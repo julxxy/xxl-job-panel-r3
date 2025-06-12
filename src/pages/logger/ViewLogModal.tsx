@@ -1,10 +1,10 @@
 import React, { useImperativeHandle, useRef, useState } from 'react'
-import { ShadcnAntdModal } from '@/components/ShadcnAntdModal'
 import api from '@/api'
 import { IModalProps } from '@/types/modal.ts'
 import { JobLog } from '@/types'
 import useZustandStore from '@/stores/useZustandStore.ts'
 import { isDebugEnable, log } from '@/common/Logger.ts'
+import { ShadcnAntdModal } from '@/components/ShadcnAntdModal.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { ReloadIcon } from '@radix-ui/react-icons'
 
@@ -68,7 +68,7 @@ export default function ViewLogModal({ parentRef, onRefresh }: IModalProps) {
           setLogContent(
             prev =>
               prev +
-              '<span class="ml-[120px] select-none  font-medium text-green-500">[Load Log Finish]</span>',
+              '<span class="ml-[120px] select-none font-semibold text-green-600 dark:text-green-400">✓ 任务执行完毕</span><br>'
           )
         }
       } else {
@@ -148,53 +148,55 @@ export default function ViewLogModal({ parentRef, onRefresh }: IModalProps) {
   }
 
   return (
-    <ShadcnAntdModal
-      open={visible}
-      onCancel={handleCancel}
-      width={950}
-      footer={null}
-      destroyOnHidden
-      title={
-        <div
-          className="drag-handle w-full flex items-center justify-center font-semibold text-base select-none"
-          style={{ cursor: 'move' }}
-        >
-          <span
-            style={{
-              flex: 1,
-              textAlign: 'center',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'left',
-              marginLeft: '28px',
-            }}
-          >
-            终端执行日志
-            {getTitleSuffix()}
-          </span>
-          <span className="text-xs text-gray-400 flex mr-12">
-            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading || !end}>
-              {loading || !end ? <ReloadIcon className="animate-spin mr-1" /> : <ReloadIcon className="mr-1" />}
-              刷新
-            </Button>
-          </span>
-        </div>
-      }
-    >
-      {() => (
-        <>
+    <>
+      <ShadcnAntdModal
+        open={visible}
+        onCancel={handleCancel}
+        width={950}
+        footer={null}
+        destroyOnHidden
+        title={
           <div
-            style={LOG_CONTENT_STYLE}
-            dangerouslySetInnerHTML={{
-              __html: logContent
-                ? logContent
-                  .replace(/\n/g, '<br/>')
-                  .replace(/\[Load Log Finish]/g, '<span style="color:#6f6;">[Load Log Finish]</span>')
-                : '<span style="color:#888">暂无日志内容</span>',
-            }}
-          />
-        </>
-      )}
-    </ShadcnAntdModal>
+            className="drag-handle w-full flex items-center justify-center font-semibold text-base select-none"
+            style={{ cursor: 'move' }}
+          >
+            <span
+              style={{
+                flex: 1,
+                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'left',
+                marginLeft: '28px',
+              }}
+            >
+              终端执行日志
+              {getTitleSuffix()}
+            </span>
+            <span className="text-xs text-gray-400 flex mr-12">
+              <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading || !end}>
+                {loading || !end ? <ReloadIcon className="animate-spin mr-1" /> : <ReloadIcon className="mr-1" />}
+                刷新
+              </Button>
+            </span>
+          </div>
+        }
+      >
+        {() => (
+          <>
+            <div
+              style={LOG_CONTENT_STYLE}
+              dangerouslySetInnerHTML={{
+                __html: logContent
+                  ? logContent
+                      .replace(/\n/g, '<br/>')
+                      .replace(/\[Load Log Finish]/g, '<span style="color:#6f6;">[Load Log Finish]</span>')
+                  : '<span style="color:#888">暂无日志内容</span>',
+              }}
+            />
+          </>
+        )}
+      </ShadcnAntdModal>
+    </>
   )
 }
