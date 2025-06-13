@@ -108,7 +108,7 @@ export const GlueTypeConfig: Record<
 // glueType 映射语言
 export const glueLangMap: Record<GlueTypeEnum, string> = {
   [GlueTypeEnum.BEAN]: 'text',
-  [GlueTypeEnum.GLUE_GROOVY]: 'groovy',
+  [GlueTypeEnum.GLUE_GROOVY]: 'java',
   [GlueTypeEnum.GLUE_NODEJS]: 'javascript',
   [GlueTypeEnum.GLUE_PHP]: 'php',
   [GlueTypeEnum.GLUE_POWERSHELL]: 'powershell',
