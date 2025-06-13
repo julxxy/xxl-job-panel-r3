@@ -81,33 +81,33 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
   // 打开弹窗
   const openModal = (action: IAction, data?: Job.JobItem) => {
     if (isDebugEnable) log.info('弹窗开启: ', action, data)
-    // 重置表单并设置基础状态
-    form.resetFields()
     setOpen(true)
     setAction(action)
     setDisabled(action === 'view')
-
-    // 处理权限组选项
     const actualJobGroupOptions = Array.isArray(data) ? data : (data?._jobGroupOptions ?? [])
     setJobGroupOptions(actualJobGroupOptions)
-
-    // 智能设置表单数据
-    const initialData = data || ({} as Job.JobItem)
-    setJobInfo(initialData)
-    // 立即填充表单数据
-    form.setFieldsValue(initialData)
-
-    // 记录初始脚本内容
-    let initialGlueSource: string
-    if (action === 'edit') {
-      initialGlueSource = data?.glueSource || ''
-    } else {
-      initialGlueSource = glueTemplates[data?.glueType as GlueTypeEnum] || ''
-    }
-    initialGlueSourceMd5Ref.current = md5(initialGlueSource)
-
-    // 清空 glue 历史版本
     setGlueHistory([])
+
+    if (action === 'create') {
+      // 新建，重置所有表单
+      form.resetFields()
+      setJobInfo({} as Job.JobItem)
+      // editorCode、glueSource、其它依赖新建的初始状态
+      const template = glueTemplates[data?.glueType as GlueTypeEnum] || ''
+      setEditorCode(template)
+      initialGlueSourceMd5Ref.current = md5(template)
+      setIsGlueSourceChanged(false)
+    } else {
+      // 编辑/查看，填充数据，不 reset
+      const initialData = data || ({} as Job.JobItem)
+      setJobInfo(initialData)
+      setTimeout(() => {
+        form.setFieldsValue(initialData)
+      }, 0)
+      setEditorCode(initialData.glueSource || '')
+      initialGlueSourceMd5Ref.current = md5(initialData.glueSource || '')
+      setIsGlueSourceChanged(false)
+    }
   }
 
   // 获取历史版本
@@ -186,18 +186,21 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
 
   function handleCancel() {
     if (isDebugEnable) log.info('取消编辑')
-    setOpen(false)
     setIsGlueSourceChanged(false)
+    setOpen(false)
   }
 
   function handleReset() {
     setJobInfo({} as Job.JobItem)
     form.resetFields()
     setIsGlueSourceChanged(false)
+    // 新建时重置 editorCode、glueSource
     if (action === 'create') {
       const template = glueTemplates[glueType] || ''
+      setEditorCode(template)
       initialGlueSourceMd5Ref.current = md5(template)
     } else {
+      setEditorCode(jobInfo.glueSource || '')
       initialGlueSourceMd5Ref.current = md5(jobInfo.glueSource || '')
     }
   }
