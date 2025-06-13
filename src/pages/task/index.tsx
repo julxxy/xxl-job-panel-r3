@@ -21,6 +21,8 @@ import dayjs from 'dayjs'
 import { RegistryNodeModal } from '@/pages/task/RegistryNodeModal.tsx'
 import { getGlueTypeDesc, GlueTypeEnum } from '@/types/enum.ts'
 import { handleCopy } from '@/utils'
+import { useNavigate } from 'react-router-dom'
+import URIs from '@/assets/URIs.json'
 
 /**
  * 任务管理
@@ -30,6 +32,7 @@ export default function TaskManageComponent() {
   const [ids, setIds] = useState<number[]>([])
   const [action, setAction] = useState<IAction>('create')
   const { confirm, dialog } = useConfirmDialog()
+  const navigate = useNavigate()
   const [jobGroupMap, setJobGroupMap] = useState<Map<number, string>>(new Map())
   const [jobGroupOptions, setJobGroupOptions] = useState<{ label: string; value: number }[]>([
     {
@@ -247,9 +250,11 @@ export default function TaskManageComponent() {
 
   async function handleViewLog(record: Job.JobItem) {
     if (isDebugEnable) log.info('查看日志: ', record)
-    const { content } = await api.logger.getJobsByGroup(record.jobGroup)
-    if (isDebugEnable) log.info('查看日志: ', content)
-    // todo 动态跳转页面
+    if (record?.jobGroup) {
+      navigate(URIs.logs, {
+        state: { jobGroup: record.jobGroup, jobId: record.id },
+      })
+    }
   }
 
   function handleClone(record: Job.JobItem) {

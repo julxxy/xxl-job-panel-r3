@@ -23,6 +23,7 @@ import { navMainItems } from '@/config/menu.config.ts'
 export function Sidebar({ ...props }: React.ComponentProps<typeof ShadUISidebar>) {
   const { userInfo } = useZustandStore()
   const [activeItem, setActiveItem] = React.useState<NavSidebarGroupItem>(navMainItems[0])
+  const { setNavTitle } = useZustandStore()
   const navigate = useNavigate()
 
   const username = userInfo.username || 'user'
@@ -61,6 +62,7 @@ export function Sidebar({ ...props }: React.ComponentProps<typeof ShadUISidebar>
           onItemClick={item => {
             log.info(item)
             setActiveItem(item)
+            setNavTitle(item.title)
             navigate(item.url)
           }}
         />
