@@ -94,8 +94,8 @@ export default function ViewLogModal({ parentRef, onRefresh }: IModalProps) {
 
   // 关闭弹窗时清理定时器
   const handleCancel = () => {
-    setVisible(false)
     stopPolling()
+    setVisible(false)
     onRefresh()
   }
 

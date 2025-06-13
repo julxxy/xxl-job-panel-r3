@@ -16,6 +16,7 @@ const useZustandStore = create<{
   activeTab: string
   chartData: TriggerStats
   chartTimeRange: { startDate: string; endDate: string }
+  navTitle: string
   /* setters */
   setToken: (token: string) => void
   setUserInfo: (userInfo: User.Info) => void
@@ -24,6 +25,7 @@ const useZustandStore = create<{
   setActiveTab: (activeTab: string) => void
   setChartData: (data: TriggerStats) => void
   setChartTimeRange: (timeRange: { startDate: string; endDate: string }) => void
+  setNavTitle: (title: string) => void
 }>(set => ({
   /* state init value */
   token: '',
@@ -36,6 +38,7 @@ const useZustandStore = create<{
   activeTab: '',
   chartData: {} as TriggerStats,
   chartTimeRange: { startDate: '', endDate: '' },
+  navTitle: '工作台', // 默认
   /* setters impl */
   setToken: (token: string) => set(() => ({ token })),
   setUserInfo: (userInfo: User.Info) => {
@@ -71,6 +74,10 @@ const useZustandStore = create<{
   setChartTimeRange(chartTimeRange: { startDate: string; endDate: string }) {
     logStateUpdate(chartTimeRange)
     set(() => ({ chartTimeRange }))
+  },
+  setNavTitle: (title: string) => {
+    logStateUpdate(title, 'navTitle')
+    set({ navTitle: title })
   },
 }))
 

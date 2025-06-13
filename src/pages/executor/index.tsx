@@ -20,6 +20,9 @@ import { ExecutorNode } from '@/pages/executor/ExecutorNode.tsx'
 import { toast } from '@/utils/toast.ts'
 import { AddressType, AddressTypeLabel } from '@/types/enum.ts'
 
+/**
+ * 执行器组件
+ */
 export default function ExecutorComponent() {
   const [form] = useForm<JobGroup.Item>()
   const [action, setAction] = useState<IAction>('create')

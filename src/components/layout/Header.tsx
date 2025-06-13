@@ -17,7 +17,7 @@ import classNames from 'classnames'
 type HeaderProps = React.HTMLAttributes<HTMLElement>
 
 const Header: React.FC<HeaderProps> = ({ className, ...props }) => {
-  const { setCollapsed } = useZustandStore()
+  const { setCollapsed, navTitle } = useZustandStore()
 
   return (
     <header
@@ -45,7 +45,7 @@ const Header: React.FC<HeaderProps> = ({ className, ...props }) => {
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>
-              <BreadcrumbPage>工作台</BreadcrumbPage>
+              <BreadcrumbPage>{navTitle || '工作台'}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

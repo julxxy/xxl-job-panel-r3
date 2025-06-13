@@ -153,3 +153,19 @@
     text-decoration: none;
   }
 }
+
+/* 覆盖 antd 的 ok 按钮样式 */
+.ant-picker-ok button {
+  background: var(--primary, #171717); /* shadcn 主色/深灰作为兜底 */
+  color: var(--primary-foreground, #fff); /* shadcn 按钮前景色/白色 */
+  border-radius: var(--radius-xl, 1rem); /* 按钮统一圆角 */
+  box-shadow: none;
+  border: none;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.ant-picker-ok button:hover,
+.ant-picker-ok button:focus {
+  background: oklch(0.145 0 0); /* 深色一点可以用 tailwind hover: 变量 */
+}

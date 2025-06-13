@@ -15,6 +15,7 @@ type IRouteObject = RouteObject & {
   children?: IRouteObject[]
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const RouteConstants = {
   layoutId: 'layout',
 }

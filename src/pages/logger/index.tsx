@@ -1,6 +1,6 @@
 import { useForm } from 'antd/es/form/Form'
 import { Job, JobLog } from '@/types'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import api from '@/api'
 import { useAntdTable } from 'ahooks'
 import { isDebugEnable, log } from '@/common/Logger.ts'
@@ -16,6 +16,7 @@ import { ModalAction } from '@/types/modal.ts'
 import ViewLogModal from '@/pages/logger/ViewLogModal.tsx'
 import { useConfirmDialog } from '@/hooks/useConfirmDialog.tsx'
 import { Ban, ViewIcon } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 
 /**
  * 日志管理
@@ -25,7 +26,6 @@ export default function LoggerComponent() {
   const [clearForm] = useForm<any>()
   const jobGroup = Form.useWatch('jobGroup', searchForm) as number
   const jobId = Form.useWatch('jobId', searchForm) as number
-  const [ids, setIds] = useState<number[]>([])
   const [visible, setVisible] = useState(false)
   const defaultOption = [{ value: 0, label: '全部' }]
   const [jobGroupOptions, setJobGroupOptions] = useState<{ label: string; value: number }[]>(defaultOption)
@@ -33,6 +33,8 @@ export default function LoggerComponent() {
   const [jobIdLabel, setJobIdLabel] = useState('')
   const [jobGroupLabel, setJobGroupLabel] = useState('')
   const { confirm, dialog } = useConfirmDialog()
+  const location = useLocation()
+  const locationParams = location?.state // { jobGroup: record.jobGroup, jobId: record.id }
 
   const modalRef = useRef<ModalAction>({
     openModal: (action, data) => {
@@ -309,7 +311,7 @@ export default function LoggerComponent() {
     return (
       <Space>
         <Tooltip title="查看日志">
-          <Button variant="ghost" size="icon" onClick={handleViewLog}>
+          <Button variant="outline" size="icon" onClick={handleViewLog}>
             <ViewIcon className="h-4 w-4" />
           </Button>
         </Tooltip>
@@ -317,7 +319,7 @@ export default function LoggerComponent() {
           {/* 使用一个 div 包裹 disabled 的按钮，确保 Tooltip 总是能正常触发 */}
           <div>
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
               onClick={handleTerminate}
               disabled={record?.handleCode !== 0}
@@ -367,6 +369,24 @@ export default function LoggerComponent() {
     confirmDelete(id, `将要终断任务 ${id} 的执行，中断后任务将失败，确认继续？`)
   }
 
+  function syncLabelsAndForm() {
+    const jobGroup = searchForm.getFieldValue('jobGroup') ?? 0
+    const jobId = searchForm.getFieldValue('jobId') ?? 0
+    const jobGroupLabel = jobGroupOptions.find(opt => opt.value === jobGroup)?.label || '全部'
+    const jobIdLabel = jobInfoOptions.find(opt => opt.value === jobId)?.label || '全部'
+    setJobIdLabel(jobIdLabel)
+    setJobGroupLabel(jobGroupLabel)
+    if (visible) {
+      clearForm.setFieldsValue({
+        jobGroup,
+        jobId,
+        type: '1',
+        jobGroupLabel,
+        jobIdLabel,
+      })
+    }
+  }
+
   const confirmDelete = useCallback(
     (jobId: number, message: string) => {
       confirm({
@@ -401,36 +421,8 @@ export default function LoggerComponent() {
     } else {
       setJobInfoOptions(defaultOption)
     }
+    // eslint-disable-next-line
   }, [jobGroup])
-
-  useEffect(() => {
-    if (visible && jobGroupOptions.length && jobInfoOptions.length) {
-      const jobGroup = searchForm.getFieldValue('jobGroup') ?? 0
-      const jobId = searchForm.getFieldValue('jobId') ?? 0
-      const jobGroupLabel = jobGroupOptions.find(opt => opt.value === jobGroup)?.label || '全部'
-      const jobIdLabel = jobInfoOptions.find(opt => opt.value === jobId)?.label || '全部'
-      setJobIdLabel(jobIdLabel)
-      setJobGroupLabel(jobGroupLabel)
-      clearForm.setFieldsValue({
-        jobGroup,
-        jobId,
-        type: '1', // 默认选中第一个
-        jobGroupLabel,
-        jobIdLabel,
-      })
-    }
-  }, [visible, jobGroupOptions, jobInfoOptions, searchForm, clearForm])
-
-  useEffect(() => {
-    if (jobGroupOptions.length && jobInfoOptions.length) {
-      const jobGroup = searchForm.getFieldValue('jobGroup') ?? 0
-      const jobId = searchForm.getFieldValue('jobId') ?? 0
-      const jobGroupLabel = jobGroupOptions.find(opt => opt.value === jobGroup)?.label || '全部'
-      const jobIdLabel = jobInfoOptions.find(opt => opt.value === jobId)?.label || '全部'
-      setJobIdLabel(jobIdLabel)
-      setJobGroupLabel(jobGroupLabel)
-    }
-  }, [jobGroupOptions, jobInfoOptions, searchForm])
 
   useEffect(() => {
     if (jobId) {
@@ -438,7 +430,22 @@ export default function LoggerComponent() {
       const jobIdLabel = jobInfoOptions.find(opt => opt.value === jobId)?.label || '全部'
       setJobIdLabel(jobIdLabel)
     }
+    // eslint-disable-next-line
   }, [jobId])
+
+  // 任务管理跳转携带参数 jobGroup，如果传了参数就覆盖
+  useEffect(() => {
+    if (locationParams !== undefined && jobGroupOptions.length) {
+      searchForm.setFieldsValue({ ...locationParams })
+    }
+  }, [jobGroupOptions, locationParams, searchForm])
+
+  useEffect(() => {
+    if (jobGroupOptions.length && jobInfoOptions.length) {
+      syncLabelsAndForm()
+    }
+    // eslint-disable-next-line
+  }, [visible, jobGroupOptions, jobInfoOptions, searchForm, clearForm])
 
   return (
     <div className={'content-area'}>
@@ -471,14 +478,6 @@ export default function LoggerComponent() {
           scroll={{ x: 'max-content' }}
           columns={columns}
           rowKey={record => record.id}
-          rowSelection={{
-            type: 'checkbox',
-            selectedRowKeys: ids,
-            onChange: (selectedRowKeys: React.Key[]) => {
-              setIds(selectedRowKeys as number[])
-              if (isDebugEnable) log.debug('ids: ', selectedRowKeys)
-            },
-          }}
           {...tableProps}
         />
       </div>
@@ -522,7 +521,7 @@ export default function LoggerComponent() {
       </ShadcnAntdModal>
 
       {/*查看日志*/}
-      <ViewLogModal parentRef={modalRef} onRefresh={() => search.submit()} />
+      <ViewLogModal parentRef={modalRef} onRefresh={() => search.reset()} />
 
       {dialog}
     </div>
