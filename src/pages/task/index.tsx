@@ -231,8 +231,9 @@ export default function TaskManageComponent() {
         return (
           <div>
             <span className="text-gray-700 mr-1">运行速率:</span>
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{record.scheduleConf}</span>
-            <span className="text-gray-700 mr-1">{(record?.scheduleConf ?? 0 > 0) ? '秒/次' : null}</span>
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+              {record.scheduleConf} {(record?.scheduleConf ?? 0 > 0) ? '秒/次' : null}
+            </span>
           </div>
         )
       default:

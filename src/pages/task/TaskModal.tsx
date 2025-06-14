@@ -17,6 +17,12 @@ import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
 import { ClipboardPaste, HistoryIcon, Move } from 'lucide-react'
 import { formatDateToLocalString } from '@/utils'
 import Draggable from 'react-draggable'
+import {
+  validateCronRule,
+  validateExecutorTimeout,
+  validateFailRetryCount,
+  validateFixRate,
+} from '@/utils/formValidators.ts'
 
 // 弹窗标题
 function getTitleText(action: IAction) {
@@ -58,6 +64,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
   const [glueHistory, setGlueHistory] = useState<JobCodeGlue[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+  const isFirstScheduleTypeChange = useRef(false)
   const formRef = useRef(form)
   const { isDarkEnable, userInfo } = useZustandStore()
   const monacoTheme = isDarkEnable ? 'vs-dark' : 'vs'
@@ -80,18 +87,22 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
 
   // 打开弹窗
   const openModal = (action: IAction, data?: Job.JobItem) => {
-    if (isDebugEnable) log.info('弹窗开启: ', action, data)
+    if (isDebugEnable) log.debug('弹窗开启: ', action, data)
     setOpen(true)
     setAction(action)
     setDisabled(action === 'view')
+    const initialData = data || ({} as Job.JobItem)
+    setJobInfo(initialData)
     const actualJobGroupOptions = Array.isArray(data) ? data : (data?._jobGroupOptions ?? [])
     setJobGroupOptions(actualJobGroupOptions)
     setGlueHistory([])
 
     if (action === 'create') {
-      // 新建，重置所有表单
+      isFirstScheduleTypeChange.current = true
       form.resetFields()
-      setJobInfo({} as Job.JobItem)
+      if (data) {
+        form.setFieldsValue(initialData) // 复制为新任务，回填数据
+      }
       // editorCode、glueSource、其它依赖新建的初始状态
       const template = glueTemplates[data?.glueType as GlueTypeEnum] || ''
       setEditorCode(template)
@@ -99,11 +110,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
       setIsGlueSourceChanged(false)
     } else {
       // 编辑/查看，填充数据，不 reset
-      const initialData = data || ({} as Job.JobItem)
-      setJobInfo(initialData)
-      setTimeout(() => {
-        form.setFieldsValue(initialData)
-      }, 0)
+      form.setFieldsValue(initialData)
       setEditorCode(initialData.glueSource || '')
       initialGlueSourceMd5Ref.current = md5(initialData.glueSource || '')
       setIsGlueSourceChanged(false)
@@ -186,12 +193,12 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
     }
 
     if (ok) {
-      setOpen(false)
       onRefresh()
       // 通过表单当前值更新初始 MD5（确保数据已提交）
       const latestGlueSource = fieldsValue.glueSource || ''
       initialGlueSourceMd5Ref.current = md5(latestGlueSource)
       setIsGlueSourceChanged(false)
+      setOpen(false)
     }
   }
 
@@ -246,20 +253,24 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
   }, [form, glueType, action])
 
   useEffect(() => {
-    if (action === 'edit' && scheduleType !== prevType) {
-      // 离开前缓存
-      confCacheRef.current[prevType] = form.getFieldValue('scheduleConf') || ''
-      // 恢复目标类型的缓存
-      form.setFieldsValue({
-        scheduleConf: confCacheRef.current[scheduleType] || '',
-      })
-      setPrevType(scheduleType)
+    if (action === 'edit') {
+      if (scheduleType !== prevType) {
+        // 离开前缓存
+        confCacheRef.current[prevType] = form.getFieldValue('scheduleConf') || ''
+        // 恢复目标类型的缓存
+        form.setFieldsValue({
+          scheduleConf: confCacheRef.current[scheduleType] || '',
+        })
+        setPrevType(scheduleType)
+      }
+    } else {
+      // 只在新建/复制时，切换类型清空 scheduleConf
+      if (isFirstScheduleTypeChange.current) {
+        isFirstScheduleTypeChange.current = false
+        return
+      }
+      form.setFieldsValue({ scheduleConf: '' })
     }
-  }, [scheduleType])
-
-  // 切换调度类型，自动清空/重置 scheduleConf 字段
-  useEffect(() => {
-    form.setFieldsValue({ scheduleConf: '' })
   }, [scheduleType])
 
   return (
@@ -346,17 +357,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
                     <Form.Item
                       label="Cron"
                       name="scheduleConf"
-                      rules={[
-                        { required: true, message: '请输入 Cron 表达式' },
-                        {
-                          validator: (_, value) => {
-                            if (!value) return Promise.reject('请输入 Cron 表达式')
-                            const fields = value.trim().split(/\s+/)
-                            if (fields.length !== 7) return Promise.reject('Cron 表达式必须7位')
-                            return Promise.resolve()
-                          },
-                        },
-                      ]}
+                      rules={[{ required: true, message: '请输入 Cron 表达式' }, { validator: validateCronRule }]}
                     >
                       <CronEditor onChange={() => undefined} value="" />
                     </Form.Item>
@@ -368,10 +369,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
                     <Form.Item
                       label="运行速率"
                       name="scheduleConf"
-                      rules={[
-                        { required: true, message: '请输入运行速率' },
-                        { pattern: /^[1-9]\d*$/, message: '请输入大于 0 的整数（秒）' },
-                      ]}
+                      rules={[{ required: true, message: '请输入运行速率' }, { validator: validateFixRate }]}
                     >
                       <Input placeholder="请输入 ( Second )" />
                     </Form.Item>
@@ -515,13 +513,27 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label="任务超时时间" name="executorTimeout" rules={[{ required: false }]}>
-                    <Input placeholder="单位秒，大于零时生效" type="number" min={0} />
+                  <Form.Item
+                    label="任务超时时间（秒）"
+                    name="executorTimeout"
+                    rules={[{ validator: validateExecutorTimeout }]}
+                  >
+                    <Input placeholder="单位秒，大于零时生效" type="number" min={0} step={1} inputMode="numeric" />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label="失败重试次数" name="executorFailRetryCount" rules={[{ required: false }]}>
-                    <Input placeholder="失败重试次数，大于零时生效" type="number" min={0} />
+                  <Form.Item
+                    label="失败重试次数"
+                    name="executorFailRetryCount"
+                    rules={[{ validator: validateFailRetryCount }]}
+                  >
+                    <Input
+                      placeholder="失败重试次数，大于零时生效"
+                      type="number"
+                      min={0}
+                      step={1}
+                      inputMode="numeric"
+                    />
                   </Form.Item>
                 </Col>
               </Row>
