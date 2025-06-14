@@ -18,7 +18,7 @@ import { ClipboardPaste, HistoryIcon, Move } from 'lucide-react'
 import { formatDateToLocalString } from '@/utils'
 import Draggable from 'react-draggable'
 
-// 标题
+// 弹窗标题
 function getTitleText(action: IAction) {
   const title = '任务'
   if (action === 'create') {
@@ -140,7 +140,11 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
     const fieldsValue = form.getFieldsValue()
     log.info(`操作: ${action} :`, fieldsValue)
 
-    async function saveGlue(values: Job.JobItem) {
+    if (fieldsValue.scheduleType === 'NONE') {
+      fieldsValue.scheduleConf = ''
+    }
+
+    async function updateGlueVersion(values: Job.JobItem) {
       if (isGlueSourceChanged && values.glueType !== GlueTypeEnum.BEAN) {
         const params = {
           id: values.id,
@@ -152,36 +156,43 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
       }
     }
 
+    // 返回 true=成功，false=失败
     async function handleCreate(values: Job.JobItem) {
-      if (isDebugEnable) log.info(`handle-create: ${values} :`, fieldsValue)
       const { code, msg, content } = await api.job.addJob(values)
       handleToastMsg(code, msg)
       if (code === 200) {
         values.id = content
-        await saveGlue(values)
+        await updateGlueVersion(values)
+        return true
       }
+      return false
     }
 
     async function handleEdit(values: Job.JobItem) {
-      if (isDebugEnable) log.info(`handle-edit: ${values} :`, fieldsValue)
       const { code, msg } = await api.job.editJob(values)
-      handleToastMsg(code, msg)
-      await saveGlue(values)
+      await updateGlueVersion(values)
+      if (code === 200) {
+        handleToastMsg(code, msg)
+        return true
+      }
+      return false
     }
 
+    let ok: boolean
     if (action === 'create') {
-      await handleCreate(fieldsValue)
+      ok = await handleCreate(fieldsValue)
     } else {
-      await handleEdit(fieldsValue)
+      ok = await handleEdit(fieldsValue)
     }
 
-    setOpen(false)
-    onRefresh()
-
-    // 通过表单当前值更新初始 MD5（确保数据已提交）
-    const latestGlueSource = fieldsValue.glueSource || ''
-    initialGlueSourceMd5Ref.current = md5(latestGlueSource)
-    setIsGlueSourceChanged(false)
+    if (ok) {
+      setOpen(false)
+      onRefresh()
+      // 通过表单当前值更新初始 MD5（确保数据已提交）
+      const latestGlueSource = fieldsValue.glueSource || ''
+      initialGlueSourceMd5Ref.current = md5(latestGlueSource)
+      setIsGlueSourceChanged(false)
+    }
   }
 
   function handleCancel() {
@@ -246,6 +257,11 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
     }
   }, [scheduleType])
 
+  // 切换调度类型，自动清空/重置 scheduleConf 字段
+  useEffect(() => {
+    form.setFieldsValue({ scheduleConf: '' })
+  }, [scheduleType])
+
   return (
     <>
       <ShadcnAntdModal<Job.JobItem>
@@ -262,7 +278,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
         destroyOnHidden={true}
       >
         {() => (
-          <Form form={form} layout="horizontal" initialValues={{}}>
+          <Form form={form} layout="horizontal">
             <Form.Item name="id" hidden>
               <Input />
             </Form.Item>
@@ -323,14 +339,26 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
                 </Col>
 
                 {/* 条件渲染：根据调度类型展示不同的配置项 */}
+                {scheduleType === 'NONE' && <Col span={12}></Col>}
+
                 {scheduleType === 'CRON' && (
                   <Col span={12}>
                     <Form.Item
                       label="Cron"
                       name="scheduleConf"
-                      rules={[{ required: true, message: '请输入 Cron 表达式' }]}
+                      rules={[
+                        { required: true, message: '请输入 Cron 表达式' },
+                        {
+                          validator: (_, value) => {
+                            if (!value) return Promise.reject('请输入 Cron 表达式')
+                            const fields = value.trim().split(/\s+/)
+                            if (fields.length !== 7) return Promise.reject('Cron 表达式必须7位')
+                            return Promise.resolve()
+                          },
+                        },
+                      ]}
                     >
-                      <CronEditor onChange={() => log.info('cron:')} value="" />
+                      <CronEditor onChange={() => undefined} value="" />
                     </Form.Item>
                   </Col>
                 )}
@@ -340,7 +368,10 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
                     <Form.Item
                       label="运行速率"
                       name="scheduleConf"
-                      rules={[{ required: true, message: '请输入运行速率' }]}
+                      rules={[
+                        { required: true, message: '请输入运行速率' },
+                        { pattern: /^[1-9]\d*$/, message: '请输入大于 0 的整数（秒）' },
+                      ]}
                     >
                       <Input placeholder="请输入 ( Second )" />
                     </Form.Item>

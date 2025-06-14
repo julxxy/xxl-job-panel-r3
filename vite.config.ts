@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => {
     },
 
     server: {
+      allowedHosts: ['.fgct.cc', 'localhost'],
       open: isTrue(env.VITE_OPEN_BROWSER),
       proxy: {
         '/job': {
