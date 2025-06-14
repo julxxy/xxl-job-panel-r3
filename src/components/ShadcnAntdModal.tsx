@@ -95,6 +95,7 @@ export function ShadcnAntdModal<T = any>({
       styles={styles}
       forceRender={forceRender}
       destroyOnHidden={destroyOnHidden}
+      loading={confirmLoading ? confirmLoading : loading}
     >
       <div className={clsx(contentPadding)}>{children?.(data)}</div>
     </Modal>

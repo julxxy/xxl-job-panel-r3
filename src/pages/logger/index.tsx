@@ -27,6 +27,7 @@ export default function LoggerComponent() {
   const jobGroup = Form.useWatch('jobGroup', searchForm) as number
   const jobId = Form.useWatch('jobId', searchForm) as number
   const [visible, setVisible] = useState(false)
+  const [clearLoading, setClearLoading] = useState(false)
   const defaultOption = [{ value: 0, label: '全部' }]
   const [jobGroupOptions, setJobGroupOptions] = useState<{ label: string; value: number }[]>(defaultOption)
   const [jobInfoOptions, setJobInfoOptions] = useState<{ label: string; value: number }[]>(defaultOption)
@@ -322,7 +323,7 @@ export default function LoggerComponent() {
               variant="outline"
               size="icon"
               onClick={handleTerminate}
-              disabled={record?.handleCode !== 0}
+              disabled={record?.triggerCode === 500 || record?.handleCode !== 0}
               className="text-red-500 hover:text-red-600"
             >
               <Ban className="h-4 w-4" />
@@ -353,12 +354,18 @@ export default function LoggerComponent() {
 
   async function handleClearLogger() {
     if (isDebugEnable) log.debug('清理日志')
-    const { jobGroup, jobId, type } = clearForm.getFieldsValue()
-    const { code } = await api.logger.clearLog({ jobGroup, jobId, type })
-    if (code === 200) toast.success('清理成功', true)
-    else toast.error('清理失败', true)
-    setVisible(false)
-    search.reset()
+    setClearLoading(true)
+    try {
+      if (isDebugEnable) log.debug('清理日志')
+      const { jobGroup, jobId, type } = clearForm.getFieldsValue()
+      const { code } = await api.logger.clearLog({ jobGroup, jobId, type })
+      if (code === 200) toast.success('清理成功', true)
+      else toast.error('清理失败', true)
+      setVisible(false)
+      search.reset()
+    } finally {
+      setClearLoading(false)
+    }
   }
 
   async function handleTerminateJob(id: number) {
@@ -490,6 +497,7 @@ export default function LoggerComponent() {
         onOk={handleClearLogger}
         onCancel={() => setVisible(false)}
         destroyOnHidden={true}
+        loading={clearLoading}
       >
         {() => (
           <Card>
