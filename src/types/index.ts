@@ -229,3 +229,11 @@ export interface TDashboardTaskStats extends Result {
     jobLogSuccessCount: number | 0
   }
 }
+
+// 顶部页签
+export interface TabItem {
+  key: string
+  label: string | React.ReactNode
+  icon?: React.ReactNode
+  closable: boolean
+}

@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useEffect } from 'react'
 import { Clock } from 'lucide-react'
 
 import { NavUser } from '@/components/layout/NavUser.tsx'
@@ -14,16 +15,21 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import useZustandStore from '@/stores/useZustandStore'
-import { log } from '@/common/Logger'
+import { isDebugEnable, log } from '@/common/Logger'
 import { NavSidebarGroupItem, NavyPrimary } from '@/components/layout/NavyPrimary.tsx'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import URIs from '@/assets/URIs.json'
-import { navMainItems } from '@/config/menu.config.ts'
+import { navMainItems, useActiveNavMainItemByURI } from '@/config/menu.config.ts'
 
+/**
+ * 侧边栏菜单（左）
+ */
 export function Sidebar({ ...props }: React.ComponentProps<typeof ShadUISidebar>) {
-  const { userInfo } = useZustandStore()
+  const { userInfo, setNavTitle } = useZustandStore()
   const [activeItem, setActiveItem] = React.useState<NavSidebarGroupItem>(navMainItems[0])
-  const { setNavTitle } = useZustandStore()
+  const { activeTab, setActiveTab } = useZustandStore()
+  const activeNavMainItem = useActiveNavMainItemByURI()
+  const { pathname } = useLocation()
   const navigate = useNavigate()
 
   const username = userInfo.username || 'user'
@@ -33,6 +39,25 @@ export function Sidebar({ ...props }: React.ComponentProps<typeof ShadUISidebar>
     avatar: 'https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/Hanfu_2.png',
   }
 
+  function getOnItemClick(item: NavSidebarGroupItem) {
+    if (isDebugEnable) log.info('item: ', item)
+    setActiveItem(item)
+    setNavTitle(item.title)
+    setActiveTab(item.url)
+    navigate(item.url)
+  }
+
+  // 组件挂载时: 获取菜单数据/恢复菜单状态
+  useEffect(() => {
+    if (activeTab) {
+      setActiveItem(activeNavMainItem)
+      setNavTitle(activeNavMainItem.title)
+      navigate(activeNavMainItem.url)
+    } else {
+      setActiveTab(activeNavMainItem.url)
+    }
+  }, [pathname])
+
   return (
     <ShadUISidebar collapsible="icon" variant="sidebar" {...props}>
       {/* 顶部区域 */}
@@ -41,7 +66,7 @@ export function Sidebar({ ...props }: React.ComponentProps<typeof ShadUISidebar>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href={URIs.root}>
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-full">
                   <Clock className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -56,16 +81,7 @@ export function Sidebar({ ...props }: React.ComponentProps<typeof ShadUISidebar>
 
       {/* 内容区 */}
       <SidebarContent>
-        <NavyPrimary
-          items={navMainItems}
-          activeItem={activeItem}
-          onItemClick={item => {
-            log.info(item)
-            setActiveItem(item)
-            setNavTitle(item.title)
-            navigate(item.url)
-          }}
-        />
+        <NavyPrimary items={navMainItems} activeItem={activeItem} onItemClick={item => getOnItemClick(item)} />
       </SidebarContent>
 
       {/* 底部区域 */}
