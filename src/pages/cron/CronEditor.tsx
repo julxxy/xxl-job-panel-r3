@@ -15,6 +15,7 @@ export default function CronEditor(props: { value: string; onChange: (newValue: 
       popupRender={() => (
         <Cron
           value={value}
+          style={{ width: 520 }}
           onOk={newValue => {
             if (isDebugEnable) log.info('用户选择的新 Cron 值：', newValue)
             if (onChange) onChange(newValue)

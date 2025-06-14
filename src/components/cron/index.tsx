@@ -14,7 +14,6 @@ import { ICronProps } from './index-conf'
 // 设置 Tab 样式
 const tabPaneStyle = {
   paddingLeft: 10,
-  paddingBottom: 8,
   marginTop: -10,
 }
 
@@ -29,7 +28,7 @@ const getTabTitle = (
     | Iterable<ReactNode>
     | null
     | undefined
-): ReactNode => <div style={{ width: 50, textAlign: 'center' }}>{text}</div>
+): ReactNode => <div style={{ minWidth: 32, maxWidth: 56, width: 50, textAlign: 'center' }}>{text}</div>
 
 // 组件函数
 function Cron(props: ICronProps) {
@@ -147,7 +146,7 @@ function Cron(props: ICronProps) {
         borderRadius: '8px',
         outline: 'none',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-        width: 600,
+        width: style?.width || 480,
         height: style?.height || 'auto',
         ...style, // 可以通过 style prop 覆盖样式
       }}
@@ -158,6 +157,7 @@ function Cron(props: ICronProps) {
           centered
           size="small"
           type="line"
+          tabBarGutter={4}
           destroyOnHidden
           activeKey={currentTab}
           onChange={setCurrentTab}

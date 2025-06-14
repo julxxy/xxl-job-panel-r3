@@ -89,6 +89,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
   const openModal = (action: IAction, data?: Job.JobItem) => {
     if (isDebugEnable) log.debug('弹窗开启: ', action, data)
     setOpen(true)
+    setIsGlueSourceChanged(false)
     setAction(action)
     setDisabled(action === 'view')
     const initialData = data || ({} as Job.JobItem)
@@ -99,21 +100,23 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
 
     if (action === 'create') {
       isFirstScheduleTypeChange.current = true
-      form.resetFields()
       if (data) {
-        form.setFieldsValue(initialData) // 复制为新任务，回填数据
+        // 复制为新任务
+        form.setFieldsValue(initialData)
+        setEditorCode(initialData.glueSource || '')
+        initialGlueSourceMd5Ref.current = md5(initialData.glueSource || '')
+      } else {
+        // 真正的新建
+        form.resetFields()
+        const template = ''
+        setEditorCode(template)
+        initialGlueSourceMd5Ref.current = md5(template)
       }
-      // editorCode、glueSource、其它依赖新建的初始状态
-      const template = glueTemplates[data?.glueType as GlueTypeEnum] || ''
-      setEditorCode(template)
-      initialGlueSourceMd5Ref.current = md5(template)
-      setIsGlueSourceChanged(false)
     } else {
       // 编辑/查看，填充数据，不 reset
       form.setFieldsValue(initialData)
       setEditorCode(initialData.glueSource || '')
       initialGlueSourceMd5Ref.current = md5(initialData.glueSource || '')
-      setIsGlueSourceChanged(false)
     }
   }
 
@@ -241,10 +244,9 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
 
   useEffect(() => {
     if (glueType && GlueTypeConfig[glueType]?.isScript) {
-      const template = glueTemplates[glueType] || ''
+      // 优先用 form 当前 glueSource，再用模板
       const existing = form.getFieldValue('glueSource')
-      const shouldUseTemplate = action === 'create' || !existing
-      const code = shouldUseTemplate ? template : existing
+      const code = existing || glueTemplates[glueType] || ''
       setEditorCode(code)
       form.setFieldValue('glueSource', code)
       initialGlueSourceMd5Ref.current = md5(code)
