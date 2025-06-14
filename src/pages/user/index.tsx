@@ -94,6 +94,7 @@ export default function UserComponent() {
           await Promise.all(ids.map(id => api.user.deleteUser({ id })))
           toast.success(`${ids.length > 1 ? '批量删除成功' : '删除成功'}`)
           setUserIds([])
+          search.reset()
         },
       })
     },
@@ -145,7 +146,10 @@ export default function UserComponent() {
         initialValues={INIT_VALUES}
         fields={searchFields}
         onSearch={search.submit}
-        onReset={form.resetFields}
+        onReset={() => {
+          form.resetFields()
+          search.reset()
+        }}
         buttons={[
           {
             key: 'addJob',
