@@ -52,10 +52,16 @@ export default function ViewLogModal({ parentRef, onRefresh }: IModalProps) {
     if (!data?.logId) return
     setLoading(true)
     try {
-      const { content } = await api.logger.getLogDetailCat({
+      const { code, content } = await api.logger.getLogDetailCat({
         ...data,
         fromLineNum: fromLineNumRef.current,
       })
+      if (code !== 200) {
+        setLoading(false)
+        stopPolling()
+        setLogContent('<span style="color:#888">暂无日志内容</span>')
+        return
+      }
       setEnd(!!content?.end)
       if (content) {
         setLogContent(prev => prev + (content.logContent || ''))
