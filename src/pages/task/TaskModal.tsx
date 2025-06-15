@@ -148,7 +148,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
 
   async function handleSubmit() {
     const fieldsValue = form.getFieldsValue()
-    log.info(`操作: ${action} :`, fieldsValue)
+    if (isDebugEnable) log.info(`操作: ${action} :`, fieldsValue)
 
     if (fieldsValue.scheduleType === 'NONE') {
       fieldsValue.scheduleConf = ''

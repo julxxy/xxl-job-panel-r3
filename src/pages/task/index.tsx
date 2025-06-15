@@ -14,7 +14,13 @@ import { Badge } from '@/components/ui/badge.tsx'
 import { ClipboardCopyIcon, ClockIcon, GearIcon, PlusIcon, RocketIcon, TrashIcon } from '@radix-ui/react-icons'
 import { DeleteIcon, EditIcon, LogsIcon, MoreHorizontal, PauseIcon, PlayIcon } from 'lucide-react'
 import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import TaskModal, { handleToastMsg } from '@/pages/task/TaskModal.tsx'
 import dayjs from 'dayjs'
@@ -53,7 +59,7 @@ export default function TaskManageComponent() {
   const fetchJobGroupOptions = async () => {
     try {
       const { content } = await api.user.getUserGroupPermissions()
-      log.info('用户组执行器权限:', content)
+      if (isDebugEnable) log.info('用户组执行器权限:', content)
 
       // 使用 map 返回新的数组
       const options = (content || []).map(({ id, title }) => ({
@@ -275,12 +281,12 @@ export default function TaskManageComponent() {
    * 更多操作
    */
   function MoreActionsMenu({ record }: { record: Job.JobItem }) {
-    const [open, setOpen] = useState(false)
+    const [moreActionVisible, setMoreActionVisible] = useState(false)
     const [nextTriggerTime, setNextTriggerTime] = useState<string[] | string | undefined>('N/A')
     const triggerTimeCache = useRef<Map<number, string[] | string>>(new Map())
 
     const handleToggleMenu = async (newOpen: boolean) => {
-      setOpen(newOpen)
+      setMoreActionVisible(newOpen)
       // 只有在打开菜单时才调用
       if (newOpen) {
         // 只有在未缓存时才请求
@@ -295,7 +301,7 @@ export default function TaskManageComponent() {
     }
 
     return (
-      <DropdownMenu open={open} onOpenChange={handleToggleMenu}>
+      <DropdownMenu open={moreActionVisible} onOpenChange={handleToggleMenu}>
         <DropdownMenuTrigger asChild>
           <Button size="sm" variant="ghost">
             <MoreHorizontal className="h-4 w-4" />
@@ -311,6 +317,7 @@ export default function TaskManageComponent() {
               </DropdownMenuItem>
             }
           />
+          <DropdownMenuSeparator />
           <DropdownMenuItem disabled>
             <ClockIcon className="mr-2 h-4 w-4 text-muted-foreground" />
 
@@ -332,6 +339,7 @@ export default function TaskManageComponent() {
               </div>
             </div>
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => handleClone(record)}>
             <ClipboardCopyIcon className="mr-2 h-4 w-4" />
             复制为新任务
@@ -462,7 +470,7 @@ export default function TaskManageComponent() {
             selectedRowKeys: ids,
             onChange: (selectedRowKeys: React.Key[]) => {
               setIds(selectedRowKeys as number[])
-              log.info('ids: ', selectedRowKeys)
+              if (isDebugEnable) log.info('ids: ', selectedRowKeys)
             },
           }}
           {...tableProps}

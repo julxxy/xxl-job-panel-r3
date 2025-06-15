@@ -202,7 +202,7 @@ export default function ExecutorComponent() {
               selectedRowKeys: ids,
               onChange: (selectedRowKeys: React.Key[]) => {
                 setIds(selectedRowKeys as number[])
-                log.info('ids: ', selectedRowKeys)
+                if (isDebugEnable) log.info('ids: ', selectedRowKeys)
               },
             }}
             {...tableProps}

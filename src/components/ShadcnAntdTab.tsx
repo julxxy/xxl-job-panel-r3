@@ -72,7 +72,7 @@ const ShadcnAntdTab: React.FC = () => {
       setActiveTab(newActiveKey)
       navigate(newActiveKey)
     },
-    [setActiveTab, navigate],
+    [setActiveTab, navigate]
   )
 
   useEffect(() => {
@@ -91,7 +91,7 @@ const ShadcnAntdTab: React.FC = () => {
       navigate(nextTab.key)
       if (isDebugEnable) log.info('Removed Tab: ', targetKey, currentTabs)
     },
-    [setActiveTab, navigate],
+    [setActiveTab, navigate]
   )
 
   // Tab编辑事件
@@ -99,7 +99,7 @@ const ShadcnAntdTab: React.FC = () => {
     (targetKey: TargetKey, action: 'add' | 'remove') => {
       if (action === 'remove') remove(targetKey)
     },
-    [remove],
+    [remove]
   )
 
   // Tab渲染优化：只渲染激活Tab内容
@@ -109,7 +109,7 @@ const ShadcnAntdTab: React.FC = () => {
         ...tab,
         label: <span style={{ marginLeft: tab.icon ? 4 : 0 }}>{tab.label}</span>,
       })),
-    [tabItems],
+    [tabItems]
   )
 
   // 兜底：只剩首页且当前不是首页时不渲染

@@ -181,7 +181,7 @@ export default function UserComponent() {
             selectedRowKeys: userIds,
             onChange: (selectedRowKeys: React.Key[]) => {
               setUserIds(selectedRowKeys as number[])
-              log.info('userIds: ', selectedRowKeys)
+              if (isDebugEnable) log.info('userIds: ', selectedRowKeys)
             },
           }}
           {...tableProps}

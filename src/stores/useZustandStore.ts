@@ -84,20 +84,24 @@ const useZustandStore = create<{
 function logStateUpdate(data: unknown, key?: any) {
   if (!isDebugEnable) return
   if (arguments.length === 1) {
-    log.debug('[Zustand] State Update (batch)', {
-      updates: data,
-      timestamp: new Date().toISOString(),
-      source: 'zustandStore',
-    })
+    if (isDebugEnable) {
+      log.debug('[Zustand] State Update (batch)', {
+        updates: data,
+        timestamp: new Date().toISOString(),
+        source: 'zustandStore',
+      })
+    }
     return
   }
   if (typeof key === 'string' && arguments.length === 2) {
-    log.debug('[Zustand] State Update', {
-      key,
-      value: data,
-      timestamp: new Date().toISOString(),
-      source: 'zustandStore',
-    })
+    if (isDebugEnable) {
+      log.debug('[Zustand] State Update', {
+        key,
+        value: data,
+        timestamp: new Date().toISOString(),
+        source: 'zustandStore',
+      })
+    }
     return
   }
   log.warn('[Zustand] Invalid state update log format', { key, data })
