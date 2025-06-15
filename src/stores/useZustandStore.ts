@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { isDebugEnable, log } from '@/common/Logger.ts'
-import { isTrue } from '@/common/booleanUtils.ts'
+import { isTrue } from '@/common/BooleanUtils.ts'
 import storage from '@/utils/storage.ts'
 import { TriggerStats, User } from '@/types'
 

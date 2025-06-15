@@ -22,7 +22,7 @@ interface ShadModalProps<T = any> {
   className?: string
   style?: CSSProperties
   styles?: ModalStyles
-  action?: 'create' | 'edit' | 'view'
+  action?: 'create' | 'clone' | 'edit' | 'view'
   forceRender?: boolean
   destroyOnHidden?: boolean
   confirmLoading?: boolean
@@ -59,19 +59,19 @@ export function ShadcnAntdModal<T = any>({
   const renderDefaultFooter = () => (
     <div className={clsx('flex justify-end gap-2', footerPadding)}>
       {/* 取消按钮 */}
-      {(action === 'create' || action === 'edit') && (
+      {(action === 'create' || action === 'edit' || action === 'clone') && (
         <Button size="sm" variant="outline" onClick={onCancel} disabled={loading}>
           {cancelText}
         </Button>
       )}
       {/* 重置按钮（可选） */}
-      {onReset && (action === 'create' || action === 'edit') && (
+      {onReset && (action === 'create' || action === 'edit' || action === 'clone') && (
         <Button size="sm" variant="ghost" onClick={onReset} disabled={loading}>
           {resetText}
         </Button>
       )}
       {/* 确认按钮 */}
-      {(action === 'create' || action === 'edit') && (
+      {(action === 'create' || action === 'edit' || action === 'clone') && (
         <Button size="sm" onClick={onOk} disabled={loading}>
           {loading ? '处理中...' : okText}
         </Button>

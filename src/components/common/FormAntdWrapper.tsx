@@ -23,9 +23,7 @@ export function FormAntdWrapper<T extends FieldValues>({
       name={name}
       control={control}
       render={({ field, fieldState }) => {
-        if (isDebugEnable) {
-          log.info('Field state: ', fieldState)
-        }
+        if (isDebugEnable) log.info('Field state: ', fieldState)
         return (
           <FormItem>
             {label && (

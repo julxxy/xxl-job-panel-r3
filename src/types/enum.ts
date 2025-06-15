@@ -1,4 +1,4 @@
-import { isTrue } from '@/common/booleanUtils.ts'
+import { isTrue } from '@/common/BooleanUtils.ts'
 
 /**
  * App environment

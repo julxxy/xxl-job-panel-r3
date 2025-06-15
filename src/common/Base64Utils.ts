@@ -1,4 +1,4 @@
-export const base64Utils = {
+export const Base64Utils = {
   defaultRecursiveCount: 15,
   isBase64(str: string): boolean {
     if (str.length % 4 !== 0) return false

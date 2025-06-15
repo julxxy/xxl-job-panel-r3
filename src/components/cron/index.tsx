@@ -10,6 +10,7 @@ import SecondPane from './SecondPane'
 import WeekPane from './WeekPane'
 import YearPane from './YearPane'
 import { ICronProps } from './index-conf'
+import { useIsMobile } from './hooks/useIsMobile'
 
 // 设置 Tab 样式
 const tabPaneStyle = {
@@ -34,6 +35,7 @@ const getTabTitle = (
 function Cron(props: ICronProps) {
   // 从 props 中解构获取传入的值
   const { style, footerStyle, footerRenderer, value, onOk } = props
+  const isMobile = useIsMobile()
 
   // 定义当前时间字段状态
   const [currentTab, setCurrentTab] = useState('1') // 当前显示的 Tab
@@ -90,9 +92,7 @@ function Cron(props: ICronProps) {
     setMonth('*')
     setWeek('?')
     setYear('*')
-    // 回调给父组件，返回默认的 cron 表达式
-    onOk?.(['*', '*', '*', '*', '*', '?', '*'].join(' '))
-  }, [onOk])
+  }, [])
 
   // 生成 cron 表达式并传递给父组件
   const onGenerate = useCallback(() => {
@@ -123,10 +123,10 @@ function Cron(props: ICronProps) {
     }
     return (
       <Space style={{ marginTop: 5 }}>
-        <Button size={'small'} type="text" onClick={onReset}>
+        <Button size="small" type="text" onClick={onReset}>
           重置
         </Button>
-        <Button size={'small'} type="default" onClick={onGenerate}>
+        <Button size="small" type="default" onClick={onGenerate}>
           生成
         </Button>
       </Space>
@@ -146,7 +146,7 @@ function Cron(props: ICronProps) {
         borderRadius: '8px',
         outline: 'none',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-        width: style?.width || 480,
+        width: isMobile ? '100%' : style?.width || 480,
         height: style?.height || 'auto',
         ...style, // 可以通过 style prop 覆盖样式
       }}
@@ -245,4 +245,6 @@ function Cron(props: ICronProps) {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 export default Cron

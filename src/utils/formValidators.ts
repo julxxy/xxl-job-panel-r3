@@ -28,3 +28,15 @@ export function validateFailRetryCount(_: any, value: string) {
   if (Number(value) > 10) return Promise.reject('失败重试次数建议不超过10次')
   return Promise.resolve()
 }
+
+// 校验JobHandler为Java方法名
+export function validateJobHandler(_: any, value: string) {
+  // 允许为空（未展示或非必填场景）
+  if (value === undefined || value === '') return Promise.resolve()
+  // 必须以小写字母开头，后续为字母或数字，长度2-64位
+  const regex = /^[a-z][a-zA-Z0-9]{1,63}$/
+  if (!regex.test(value)) {
+    return Promise.reject(new Error('JobHandler 必须为2-64位Java方法名（小写字母开头，仅字母和数字）'))
+  }
+  return Promise.resolve()
+}
