@@ -6,8 +6,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { format } from 'date-fns'
 import useZustandStore from '@/stores/useZustandStore.ts'
-import { isFalse } from '@/common/booleanUtils.ts'
-import { objectUtils } from '@/common/objectUtils.ts'
+import { isFalse } from '@/common/BooleanUtils.ts'
+import { ObjectUtils } from '@/common/ObjectUtils.ts'
 import { getDiffInDays } from '@/utils'
 
 // 模拟数据
@@ -49,7 +49,7 @@ export function ExecutionResultPieChart() {
   const { chartData, chartTimeRange } = useZustandStore()
   const { startDate, endDate } = chartTimeRange
 
-  const isMock = isFalse(objectUtils.hasData(chartData?.triggerDayList))
+  const isMock = isFalse(ObjectUtils.hasData(chartData?.triggerDayList))
 
   const days = (() => {
     const diff = getDiffInDays(startDate, endDate)

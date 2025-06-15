@@ -9,7 +9,7 @@ import { useConfirmDialog } from '@/hooks/useConfirmDialog.tsx'
 import { isDebugEnable, log } from '@/common/Logger.ts'
 import { ColumnsType } from 'antd/es/table'
 import { Space, Table } from 'antd'
-import { toast } from '@/utils/toast.ts'
+import { handleToastMsg, toast } from '@/utils/toast.ts'
 import { Badge } from '@/components/ui/badge.tsx'
 import { ClipboardCopyIcon, ClockIcon, GearIcon, PlusIcon, RocketIcon, TrashIcon } from '@radix-ui/react-icons'
 import { DeleteIcon, EditIcon, LogsIcon, MoreHorizontal, PauseIcon, PlayIcon } from 'lucide-react'
@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import TaskModal, { handleToastMsg } from '@/pages/task/TaskModal.tsx'
+import TaskModal from '@/pages/task/TaskModal.tsx'
 import dayjs from 'dayjs'
 import { RegistryNodeModal } from '@/pages/task/RegistryNodeModal.tsx'
 import { getGlueTypeDesc, GlueTypeEnum } from '@/types/enum.ts'
@@ -274,7 +274,7 @@ export default function TaskManageComponent() {
     if (isDebugEnable) log.info('复制数据:', record)
     const cloned = { ...record, id: undefined, jobDesc: `${record.jobDesc} - 副本` }
     cloned._jobGroupOptions = jobGroupOptions
-    modalRef?.current.openModal('create', cloned)
+    modalRef?.current.openModal('clone', cloned)
   }
 
   /**

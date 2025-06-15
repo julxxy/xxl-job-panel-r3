@@ -1,7 +1,7 @@
 /**
  * Common utility functions used across the project.
  */
-export const objectUtils = {
+export const ObjectUtils = {
   /**
    * 判断数据是否包含有效内容
    */

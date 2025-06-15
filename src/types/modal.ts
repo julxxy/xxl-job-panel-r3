@@ -34,12 +34,4 @@ export interface ModalAction {
 /**
  * 弹窗组件的操作行为
  */
-export type IAction = 'create' | 'edit' | 'view'
-
-export const ModalVariables = {
-  width: 500,
-  layout: {
-    labelCol: { span: 8 },
-    wrapperCol: { span: 16 },
-  },
-}
+export type IAction = 'create' | 'clone' | 'edit' | 'view'

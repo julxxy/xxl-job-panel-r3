@@ -4,13 +4,12 @@ import { ShadcnAntdModal } from '@/components/ShadcnAntdModal.tsx'
 import { isDebugEnable, log } from '@/common/Logger.ts'
 import React, { useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Card, Col, Collapse, Form, Input, Row, Select, Spin } from 'antd'
-import CronEditor from '@/pages/cron/CronEditor.tsx'
 import { ExecutorRouteStrategyI18n, glueLangMap, GlueTypeConfig, GlueTypeEnum, ScheduleTypeEnum } from '@/types/enum.ts'
 import Editor from '@monaco-editor/react'
 import { glueTemplates } from '@/constants/glueTemplates.ts'
 import useZustandStore from '@/stores/useZustandStore.ts'
 import api from '@/api'
-import { toast } from '@/utils/toast.ts'
+import { handleToastMsg, toast } from '@/utils/toast.ts'
 import md5 from 'blueimp-md5'
 import { Button } from '@/components/ui/button.tsx'
 import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
@@ -22,12 +21,14 @@ import {
   validateExecutorTimeout,
   validateFailRetryCount,
   validateFixRate,
+  validateJobHandler,
 } from '@/utils/formValidators.ts'
+import CronEditor from '@/components/CronEditor.tsx'
 
 // 弹窗标题
 function getTitleText(action: IAction) {
   const title = '任务'
-  if (action === 'create') {
+  if (['create', 'clone'].includes(action)) {
     return `新建${title}`
   }
   if (action === 'edit') {
@@ -37,15 +38,6 @@ function getTitleText(action: IAction) {
     return `${title}详情`
   }
   return undefined
-}
-
-// eslint-disable-next-line react-refresh/only-export-components
-export function handleToastMsg(code: number, msg: string) {
-  if (code !== 200) {
-    toast.error(msg || 'Error!')
-  } else {
-    toast.success('SUCCESS')
-  }
 }
 
 /**
@@ -98,25 +90,32 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
     setJobGroupOptions(actualJobGroupOptions)
     setGlueHistory([])
 
-    if (action === 'create') {
-      isFirstScheduleTypeChange.current = true
-      if (data) {
-        // 复制为新任务
-        form.setFieldsValue(initialData)
-        setEditorCode(initialData.glueSource || '')
-        initialGlueSourceMd5Ref.current = md5(initialData.glueSource || '')
-      } else {
-        // 真正的新建
+    switch (action) {
+      case 'create': {
+        if (isDebugEnable) log.debug('新建任务: ', action, data)
+        isFirstScheduleTypeChange.current = true
         form.resetFields()
         const template = ''
         setEditorCode(template)
         initialGlueSourceMd5Ref.current = md5(template)
+        break
       }
-    } else {
-      // 编辑/查看，填充数据，不 reset
-      form.setFieldsValue(initialData)
-      setEditorCode(initialData.glueSource || '')
-      initialGlueSourceMd5Ref.current = md5(initialData.glueSource || '')
+      case 'clone': {
+        if (isDebugEnable) log.debug('复制任务: ', action, data)
+        isFirstScheduleTypeChange.current = true
+        form.setFieldsValue(initialData)
+        setEditorCode(initialData.glueSource || '')
+        initialGlueSourceMd5Ref.current = md5(initialData.glueSource || '')
+        setJobGroupOptions(initialData._jobGroupOptions || [])
+        break
+      }
+      case 'edit': {
+        if (isDebugEnable) log.debug('编辑任务: ', action, data)
+        form.setFieldsValue(initialData)
+        setEditorCode(initialData.glueSource || '')
+        initialGlueSourceMd5Ref.current = md5(initialData.glueSource || '')
+        break
+      }
     }
   }
 
@@ -136,6 +135,23 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
       setGlueHistory([])
     } finally {
       setHistoryLoading(false)
+    }
+  }
+
+  const fetchJobGroupOptions = async () => {
+    try {
+      const { code, content } = await api.user.getUserGroupPermissions()
+      if (isDebugEnable) log.debug('用户组执行器权限:', content)
+      if (code === 200) {
+        const options = (content || []).map(({ id, title }) => ({
+          label: title,
+          value: id,
+        }))
+        const sortedOptions = [...options].sort((a, b) => a.value - b.value)
+        setJobGroupOptions(sortedOptions)
+      }
+    } catch (error) {
+      if (isDebugEnable) log.error('获取用户组权限失败:', error)
     }
   }
 
@@ -159,8 +175,9 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
         const params = {
           id: values.id,
           glueSource: values.glueSource,
-          glueRemark:
-            action === 'create' ? `${userInfo.username + '初始化脚本'}` : `${userInfo.username + '更新了脚本'}`,
+          glueRemark: ['create', 'clone'].includes(action)
+            ? `${userInfo.username + '初始化脚本'}`
+            : `${userInfo.username + '更新了脚本'}`,
         }
         await api.jobCode.addGlue(params)
       }
@@ -189,7 +206,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
     }
 
     let ok: boolean
-    if (action === 'create') {
+    if (['create', 'clone'].includes(action)) {
       ok = await handleCreate(fieldsValue)
     } else {
       ok = await handleEdit(fieldsValue)
@@ -202,57 +219,52 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
       initialGlueSourceMd5Ref.current = md5(latestGlueSource)
       setIsGlueSourceChanged(false)
       setOpen(false)
+      handleReset()
     }
   }
 
   function handleCancel() {
     if (isDebugEnable) log.info('取消编辑')
-    setIsGlueSourceChanged(false)
     setOpen(false)
+    handleReset()
   }
 
   function handleReset() {
     setJobInfo({} as Job.JobItem)
-    form.resetFields()
+    setEditorCode('')
     setIsGlueSourceChanged(false)
-    // 新建时重置 editorCode、glueSource
-    if (action === 'create') {
-      const template = glueTemplates[glueType] || ''
-      setEditorCode(template)
-      initialGlueSourceMd5Ref.current = md5(template)
-    } else {
-      setEditorCode(jobInfo.glueSource || '')
-      initialGlueSourceMd5Ref.current = md5(jobInfo.glueSource || '')
-    }
+    setJobGroupOptions([])
+    setGlueHistory([])
+    setHistoryDialogOpen(false)
+    initialGlueSourceMd5Ref.current = ''
+    form.resetFields()
   }
 
   // 延迟设置字段，确保 Form 已挂载
   useEffect(() => {
     if ((action === 'edit' || action === 'view') && open && jobInfo && Object.keys(jobInfo).length > 0) {
-      setTimeout(() => {
-        form.setFieldsValue(jobInfo)
-      }, 10)
+      setTimeout(() => form.setFieldsValue(jobInfo), 10)
     }
   }, [open, action, jobInfo, form])
 
   // 动态渲染
   useEffect(() => {
-    if (!showJobHandler) {
+    if (!showJobHandler && formRef.current.getFieldValue('executorHandler')) {
       formRef.current.setFieldValue('executorHandler', '')
     }
   }, [showJobHandler])
 
   useEffect(() => {
     if (glueType && GlueTypeConfig[glueType]?.isScript) {
-      // 优先用 form 当前 glueSource，再用模板
-      const existing = form.getFieldValue('glueSource')
-      const code = existing || glueTemplates[glueType] || ''
+      // 直接用模板内容覆盖
+      const code = glueTemplates[glueType] || ''
       setEditorCode(code)
       form.setFieldValue('glueSource', code)
       initialGlueSourceMd5Ref.current = md5(code)
-      setIsGlueSourceChanged(action === 'create')
+      setIsGlueSourceChanged(['create', 'clone'].includes(action))
     }
-  }, [form, glueType, action])
+    // eslint-disable-next-line
+  }, [glueType, action])
 
   useEffect(() => {
     if (action === 'edit') {
@@ -273,6 +285,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
       }
       form.setFieldsValue({ scheduleConf: '' })
     }
+    // eslint-disable-next-line
   }, [scheduleType])
 
   return (
@@ -284,7 +297,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
         open={open}
         onCancel={handleCancel}
         onOk={handleSubmit}
-        onReset={action === 'create' ? () => handleReset() : undefined}
+        onReset={['create', 'clone'].includes(action) ? handleReset : undefined}
         action={action}
         style={{ top: 30 }}
         styles={{ body: { maxHeight: '70vh', minHeight: 400, overflowY: 'auto' } }}
@@ -312,6 +325,12 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
                         const value = option?.value?.toString()?.toLowerCase() || ''
                         const keyword = input.toLowerCase()
                         return label.includes(keyword) || value.includes(keyword)
+                      }}
+                      // 只在下拉展开且options为空时请求
+                      onOpenChange={async open => {
+                        if (open && jobGroupOptions.length === 0) {
+                          await fetchJobGroupOptions()
+                        }
                       }}
                     />
                   </Form.Item>
@@ -383,7 +402,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
             {/* —— 任务配置 —— */}
             <Card title="任务配置" variant="outlined" style={{ marginBottom: 12 }}>
               <Row gutter={16}>
-                <Col span={12}>
+                <Col span={showJobHandler ? 12 : 24}>
                   <Form.Item label="运行模式" name="glueType" rules={[{ required: true }]}>
                     <Select
                       placeholder="请选择运行模式"
@@ -393,18 +412,20 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
                   </Form.Item>
                 </Col>
 
-                <Col span={12}>
-                  <Form.Item
-                    label="JobHandler"
-                    name="executorHandler"
-                    rules={[{ required: showJobHandler, message: '请输入 JobHandler' }]}
-                  >
-                    <Input placeholder="请输入 JobHandler" disabled={!showJobHandler} />
-                  </Form.Item>
-                </Col>
+                {showJobHandler && (
+                  <Col span={12}>
+                    <Form.Item
+                      label="JobHandler"
+                      name="executorHandler"
+                      rules={[{ required: true, message: '请输入 JobHandler' }, { validator: validateJobHandler }]}
+                    >
+                      <Input placeholder="请输入 JobHandler" />
+                    </Form.Item>
+                  </Col>
+                )}
 
                 <Col span={24}>
-                  <Form.Item label="任务参数" name="executorParam" rules={[{ required: true }]}>
+                  <Form.Item label="任务参数" name="executorParam" rules={[{ required: false }]}>
                     <Input.TextArea allowClear placeholder="请输入任务参数" />
                   </Form.Item>
                 </Col>
@@ -419,7 +440,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
                     >
                       <div className="border rounded-md overflow-hidden dark:border-zinc-800">
                         {/* 历史版本按钮 */}
-                        {action !== 'create' && (
+                        {!['create', 'clone'].includes(action) && (
                           <div className="flex items-center justify-between">
                             <span>
                               {isGlueSourceChanged && <span className="text-yellow-500 ml-2">脚本已修改</span>}

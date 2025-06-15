@@ -25,4 +25,12 @@ const toast = {
   },
 }
 
-export { toast }
+function handleToastMsg(code: number, msg: string) {
+  if (code !== 200) {
+    toast.error(msg || 'Error!')
+  } else {
+    toast.success('SUCCESS')
+  }
+}
+
+export { toast, handleToastMsg }

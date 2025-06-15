@@ -14,8 +14,8 @@ import {
 } from '@/components/ui/chart.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx'
 import useZustandStore from '@/stores/useZustandStore.ts'
-import { objectUtils } from '@/common/objectUtils.ts'
-import { isFalse } from '@/common/booleanUtils.ts'
+import { ObjectUtils } from '@/common/ObjectUtils.ts'
+import { isFalse } from '@/common/BooleanUtils.ts'
 import { TriggerStats } from '@/types'
 import api from '@/api'
 import { formatDate } from 'date-fns/format'
@@ -57,7 +57,7 @@ export function DailyExecutionLineChart() {
   const { setChartTimeRange } = useZustandStore()
 
   const [timeRange, setTimeRange] = React.useState('30d')
-  const useMock = isFalse(objectUtils.hasData(chartData?.triggerDayList))
+  const useMock = isFalse(ObjectUtils.hasData(chartData?.triggerDayList))
 
   function getFilteredMockData() {
     return rawDataOfDailyExecution.filter(item => {

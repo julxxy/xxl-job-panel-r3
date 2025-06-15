@@ -43,7 +43,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         setLoading(false)
       }
     } catch (e) {
-      log.error(e)
+      log.error('登录失败:', e)
       setLoading(false)
     }
   }
