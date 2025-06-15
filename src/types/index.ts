@@ -1,4 +1,9 @@
-import { ExecutorBlockStrategy, ScheduleTypeEnum } from '@/types/enum.ts'
+import {
+  ExecutorBlockStrategy,
+  ExecutorRouteStrategyEnum,
+  MisfireStrategyEnum,
+  ScheduleTypeEnum,
+} from '@/types/enum.ts'
 
 // 返回包装
 export interface Result<T = any> {
@@ -52,11 +57,11 @@ export namespace Job {
     alarmEmail: string
     author: string
     childJobId: string
-    executorBlockStrategy: string
+    executorBlockStrategy: ExecutorBlockStrategy
     executorFailRetryCount: number
     executorHandler: string
     executorParam: string
-    executorRouteStrategy: ExecutorBlockStrategy
+    executorRouteStrategy: ExecutorRouteStrategyEnum
     executorTimeout: number
     glueRemark: string
     glueSource: string
@@ -65,7 +70,7 @@ export namespace Job {
     id: number
     jobDesc: string
     jobGroup: number
-    misfireStrategy: string
+    misfireStrategy: MisfireStrategyEnum
     scheduleConf: string
     scheduleType: ScheduleTypeEnum
     triggerLastTime: number

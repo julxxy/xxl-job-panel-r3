@@ -32,6 +32,14 @@ export type ScheduleTypeEnum = 'NONE' | 'CRON' | 'FIX_RATE'
 export type ExecutorBlockStrategy = 'SERIAL_EXECUTION' | 'DISCARD_LATER' | 'COVER_EARLY'
 
 /**
+ * 调度过期策略
+ */
+export enum MisfireStrategyEnum {
+  DO_NOTHING = 'DO_NOTHING',
+  FIRE_ONCE_NOW = 'FIRE_ONCE_NOW',
+}
+
+/**
  * Glue运行模式及示例
  */
 export enum GlueTypeEnum {

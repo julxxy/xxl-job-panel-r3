@@ -4,7 +4,15 @@ import { ShadcnAntdModal } from '@/components/ShadcnAntdModal.tsx'
 import { isDebugEnable, log } from '@/common/Logger.ts'
 import React, { useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Card, Col, Collapse, Form, Input, Row, Select, Spin } from 'antd'
-import { ExecutorRouteStrategyI18n, glueLangMap, GlueTypeConfig, GlueTypeEnum, ScheduleTypeEnum } from '@/types/enum.ts'
+import {
+  ExecutorRouteStrategyEnum,
+  ExecutorRouteStrategyI18n,
+  glueLangMap,
+  GlueTypeConfig,
+  GlueTypeEnum,
+  MisfireStrategyEnum,
+  ScheduleTypeEnum,
+} from '@/types/enum.ts'
 import Editor from '@monaco-editor/react'
 import { glueTemplates } from '@/constants/glueTemplates.ts'
 import useZustandStore from '@/stores/useZustandStore.ts'
@@ -44,7 +52,7 @@ function getTitleText(action: IAction) {
  * 任务弹窗
  */
 export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
-  const [form] = Form.useForm()
+  const [form] = Form.useForm<Job.JobItem>()
   const [open, setOpen] = useState(false)
   const [action, setAction] = useState<IAction>('create')
   const [disabled, setDisabled] = useState(false)
@@ -95,6 +103,14 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
         if (isDebugEnable) log.debug('新建任务: ', action, data)
         isFirstScheduleTypeChange.current = true
         form.resetFields()
+        form.setFieldsValue({
+          jobGroup: actualJobGroupOptions[0]?.value ?? undefined,
+          scheduleType: 'CRON',
+          glueType: GlueTypeEnum.BEAN,
+          executorRouteStrategy: ExecutorRouteStrategyEnum.ROUND,
+          misfireStrategy: MisfireStrategyEnum.DO_NOTHING,
+          executorBlockStrategy: 'SERIAL_EXECUTION',
+        })
         const template = ''
         setEditorCode(template)
         initialGlueSourceMd5Ref.current = md5(template)
@@ -287,6 +303,13 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
     }
     // eslint-disable-next-line
   }, [scheduleType])
+
+  useEffect(() => {
+    if (action === 'create' && open && jobGroupOptions.length > 0 && !form.getFieldValue('jobGroup')) {
+      form.setFieldsValue({ jobGroup: jobGroupOptions[0].value })
+    }
+    // eslint-disable-next-line
+  }, [jobGroupOptions, action, open])
 
   return (
     <>
