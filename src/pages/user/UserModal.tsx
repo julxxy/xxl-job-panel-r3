@@ -37,13 +37,13 @@ export default function UserModal({ parentRef, onRefresh }: IModalProps) {
 
   const getUserGroupPermissions = async () => {
     const { content } = await api.user.getUserGroupPermissions()
-    log.info('用户组权限:', content)
+    if (isDebugEnable) log.info('用户组权限:', content)
     setJobGroup([...content])
   }
 
   const handleOk = () => {
     const fieldsValue = form.getFieldsValue()
-    log.info(`操作: ${action} :`, fieldsValue)
+    if (isDebugEnable) log.info(`操作: ${action} :`, fieldsValue)
     if (action === 'create') {
       handleCreate(fieldsValue)
     } else {

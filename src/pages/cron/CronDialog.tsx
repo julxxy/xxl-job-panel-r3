@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { log } from '@/common/Logger.ts'
+import { isDebugEnable, log } from '@/common/Logger.ts'
 import Cron from '@/components/cron'
 
 export function CronDialog({ onSave: _onSave }: { onSave: (cron: string) => void }) {
@@ -28,7 +28,7 @@ export function CronDialog({ onSave: _onSave }: { onSave: (cron: string) => void
         <Cron
           value={value}
           onOk={(newValue: string) => {
-            log.info('用户选择的新 Cron 值：', newValue)
+            if (isDebugEnable) log.info('用户选择的新 Cron 值：', newValue)
             setValue(newValue)
           }}
         />

@@ -213,7 +213,7 @@ export default function LoggerComponent() {
   const getJobGroupOptions = async () => {
     try {
       const { content } = await api.user.getUserGroupPermissions()
-      log.info('用户组执行器权限:', content)
+      if (isDebugEnable) log.info('用户组执行器权限:', content)
 
       // 过滤掉接口返回的 value 为 0 的项
       const options = (content || [])
@@ -235,7 +235,7 @@ export default function LoggerComponent() {
   const getJobInfoOptions = async (jobGroup: number) => {
     try {
       const { content } = await api.logger.getJobsByGroup(jobGroup)
-      log.info('用户组执行器权限:', content)
+      if (isDebugEnable) log.info('用户组执行器权限:', content)
 
       const options = (content || [])
         .map(({ id, jobDesc }: Job.JobItem) => ({
