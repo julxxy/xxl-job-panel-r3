@@ -60,6 +60,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
   const [jobGroupOptions, setJobGroupOptions] = useState<{ label: string; value: number }[]>([])
   const initialGlueSourceMd5Ref = useRef<string>('')
   const [isGlueSourceChanged, setIsGlueSourceChanged] = useState(false)
+  const isFirstGlueTypeChange = useRef(true)
   const [editorCode, setEditorCode] = useState('')
   const [glueHistory, setGlueHistory] = useState<JobCodeGlue[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
@@ -119,6 +120,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
       case 'clone': {
         if (isDebugEnable) log.debug('复制任务: ', action, data)
         isFirstScheduleTypeChange.current = true
+        isFirstGlueTypeChange.current = true
         form.setFieldsValue(initialData)
         setEditorCode(initialData.glueSource || '')
         initialGlueSourceMd5Ref.current = md5(initialData.glueSource || '')
@@ -127,6 +129,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
       }
       case 'edit': {
         if (isDebugEnable) log.debug('编辑任务: ', action, data)
+        isFirstGlueTypeChange.current = true
         form.setFieldsValue(initialData)
         setEditorCode(initialData.glueSource || '')
         initialGlueSourceMd5Ref.current = md5(initialData.glueSource || '')
@@ -272,7 +275,12 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
 
   useEffect(() => {
     if (glueType && GlueTypeConfig[glueType]?.isScript) {
-      // 直接用模板内容覆盖
+      if (isFirstGlueTypeChange.current) {
+        // 第一次渲染，不覆盖，保留原内容
+        isFirstGlueTypeChange.current = false
+        return
+      }
+      // 用户主动切换 glueType，才用模板内容覆盖
       const code = glueTemplates[glueType] || ''
       setEditorCode(code)
       form.setFieldValue('glueSource', code)
@@ -280,7 +288,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
       setIsGlueSourceChanged(['create', 'clone'].includes(action))
     }
     // eslint-disable-next-line
-  }, [glueType, action])
+  }, [glueType])
 
   useEffect(() => {
     if (action === 'edit') {
