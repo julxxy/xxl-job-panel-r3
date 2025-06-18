@@ -1,14 +1,13 @@
 import { lazy } from 'react'
 import { createBrowserRouter, Navigate, RouteObject } from 'react-router-dom'
 import { Spin } from 'antd'
-
-import Layout from '@/components/layout'
 import LoginPage from '@/pages/login'
 import NotFound from '@/pages/error/NotFound'
 import NoPermission from '@/pages/error/NoPermission'
 import ProtectedRoute from '@/routes/ProtectedRoute'
 import Lazy from '@/components/Lazy'
 import URIs from '@/assets/URIs.json'
+import Layout from '@/components/Layout'
 
 type IRouteObject = RouteObject & {
   enableAuth?: boolean

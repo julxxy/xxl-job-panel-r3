@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useEffect } from 'react'
 import { Clock } from 'lucide-react'
 
-import { NavUser } from '@/components/layout/NavUser.tsx'
+import { NavUser } from '@/components/Layout/NavUser.tsx'
 
 import {
   Sidebar as ShadUISidebar,
@@ -16,9 +16,8 @@ import {
 } from '@/components/ui/sidebar'
 import useZustandStore from '@/stores/useZustandStore'
 import { isDebugEnable, log } from '@/common/Logger'
-import { NavSidebarGroupItem, NavyPrimary } from '@/components/layout/NavyPrimary.tsx'
+import { NavSidebarGroupItem, NavyPrimary } from '@/components/Layout/NavyPrimary.tsx'
 import { useLocation, useNavigate } from 'react-router-dom'
-import URIs from '@/assets/URIs.json'
 import { navMainItems, useActiveNavMainItemByURI } from '@/config/menu.config.ts'
 
 /**
@@ -64,16 +63,17 @@ export function Sidebar({ ...props }: React.ComponentProps<typeof ShadUISidebar>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href={URIs.root}>
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-full">
-                  <Clock className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="font-semibold">{import.meta.env.VITE_APP_NAME}</span>
-                  <span>{import.meta.env.VITE_APP_VERSION}</span>
-                </div>
-              </a>
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            >
+              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                <Clock className="size-4" />
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{import.meta.env.VITE_APP_NAME}</span>
+                <span className="truncate text-xs">{import.meta.env.VITE_APP_VERSION}</span>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

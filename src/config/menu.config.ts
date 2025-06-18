@@ -1,4 +1,4 @@
-import { NavSidebarGroupItem } from '@/components/layout/NavyPrimary.tsx'
+import { NavSidebarGroupItem } from '@/components/Layout/NavyPrimary.tsx'
 import { BookOpenCheck, LayoutDashboard, ListChecks, ServerCog, Users2 } from 'lucide-react'
 import URIs from '@/assets/URIs.json'
 import React from 'react'
