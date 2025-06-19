@@ -1,0 +1,94 @@
+#root {
+  --header-bg: #141414;
+  --header-text: #ffffff;
+  --sidebar-bg: #1f1f1f;
+  --sidebar-text: #bbbbbb;
+  --content-bg: #181818;
+  --content-text: #eeeeee;
+  --footer-bg: #1f1f1f;
+  --footer-text: #bbbbbb;
+
+  /* Content area background colors */
+  --bg-color-primary: #edf2f7; /* 浅蓝灰色 */
+  --bg-color-secondary: #e0e7f1; /* 浅灰蓝色 */
+  --bg-color-thirdary: #e8e8e8; /* 淡灰色 */
+
+  /* Text colors */
+  --color-text-primary: #000000; /* 默认文本颜色 */
+  --color-text-primary-dark: #003366; /* 深色文本颜色 */
+
+  /* Border and shadow */
+  --border-default: 1 solid #d9d9d9; /* 默认边框: 提升边界感 */
+  --border-radius-default: 8px; /* 默认的圆角半径 */
+  --box-shadow-default: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影效果 */
+}
+
+/* 暗黑主题 */
+[data-theme='dark'] {
+  --bg-color-101: #141414;
+  --bg-color-102: #1f1f1f;
+  --bg-color-103: #121212;
+  --bg-color-104: #0d1117;
+  --bg-color-105: #2a2a2a;
+  --bg-color-106: #2d2d2d;
+  --bg-color-107: #212121;
+  --bg-color-108: #2f2f2f;
+  --bg-color-109: #424242;
+
+  --bg-color-primary: var(--bg-color-106);
+  --bg-color-secondary: var(--bg-color-109);
+
+  --color-text-primary: var(--content-text);
+}
+
+/* 主内容区容器，用于包裹整个页面的内容区域 */
+.content-area {
+  width: 100%;
+}
+
+/* 搜索框区域 */
+.content-search-box {
+  padding: 10px;
+  border: var(--border-default);
+  border-radius: var(--border-radius-default);
+  box-shadow: var(--box-shadow-default);
+}
+
+/* 表格整体容器，包含表头和内容部分 */
+.content-table {
+  .title {
+    font-weight: bolder;
+    font-size: medium;
+  }
+
+  border-radius: var(--border-radius-default);
+  box-shadow: var(--box-shadow-default);
+  border: var(--border-default);
+
+  /* 表头区域，包含标题和操作按钮 */
+
+  .content-table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 5px 5px 0 0;
+    padding: 15px;
+
+    /* 操作按钮样式 */
+
+    .action-btn {
+      margin-right: 10px;
+
+      /* 最后一个按钮去掉右边距，避免多余间隙 */
+
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  }
+}
+
+/* 搜索框与表格之间的垂直间距 */
+.content-search-box + .content-table {
+  margin-top: 18px;
+}
