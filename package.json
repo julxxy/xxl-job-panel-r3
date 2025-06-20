@@ -12,7 +12,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier . --write"
+    "format": "prettier . --write",
+    "add-header": "node tools/license-header/add-header.js --dir ./src --project \"xxl-job-panel-r3\" --author \"Julian\""
   },
   "dependencies": {
     "@ant-design/icons": "^6.0.0",
