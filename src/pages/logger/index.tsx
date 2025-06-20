@@ -548,7 +548,7 @@ export default function LoggerComponent() {
       </ShadcnAntdModal>
 
       {/*查看日志*/}
-      <ViewLogModal parentRef={modalRef} onRefresh={() => search.reset()} />
+      <ViewLogModal parentRef={modalRef} onRefresh={() => search.submit()} />
 
       {dialog}
     </div>

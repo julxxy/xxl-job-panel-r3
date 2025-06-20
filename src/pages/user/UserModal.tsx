@@ -60,13 +60,13 @@ export default function UserModal({ parentRef, onRefresh }: IModalProps) {
     setJobGroup([...content])
   }
 
-  const handleOk = () => {
+  const handleOk = async () => {
     const fieldsValue = form.getFieldsValue()
     if (isDebugEnable) log.info(`操作: ${action} :`, fieldsValue)
     if (action === 'create') {
-      handleCreate(fieldsValue)
+      await handleCreate(fieldsValue)
     } else {
-      handleEdit(fieldsValue)
+      await handleEdit(fieldsValue)
     }
     setOpen(false)
     onRefresh()
