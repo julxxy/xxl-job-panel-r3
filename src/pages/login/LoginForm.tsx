@@ -94,7 +94,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
       <div className="grid gap-6">
         <div className="grid gap-2">
           <Label htmlFor="userName">账号</Label>
-          <Input id="userName" name="userName" type="text" defaultValue="admin" required />
+          <Input id="userName" name="userName" type="text" defaultValue="lisi" required />
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
