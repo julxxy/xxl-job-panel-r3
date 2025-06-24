@@ -46,6 +46,9 @@ export default {
     editPwd(params: User.EditPwdParams) {
       return apiClient.post<Result>('/user/updatePwd', undefined, { params })
     },
+    getUserRole(userName: string) {
+      return apiClient.post<Result>(`/r3/support/v1/user/role/${userName}`, undefined, apiClient.generateFormHeaders())
+    },
     getUserList(params: User.UserPageQuery) {
       return apiClient.get<User.UserPageListResponse>('/user/pageList', undefined, { params })
     },

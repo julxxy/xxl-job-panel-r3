@@ -33,22 +33,24 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import useZustandStore from '@/stores/useZustandStore'
+import useZustandStore from '@/stores/useZustandStore.ts'
 import { isDebugEnable, log } from '@/common/Logger'
 import { NavSidebarGroupItem, NavyPrimary } from '@/components/Layout/NavyPrimary.tsx'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { navMainItems, useActiveNavMainItemByURI } from '@/config/menu.config.ts'
+import useIsAdmin from '@/hooks/useIsAdmin.ts'
+import URIs from '@/assets/URIs.json'
 
 /**
  * 侧边栏菜单（左）
  */
 export function Sidebar({ ...props }: React.ComponentProps<typeof ShadUISidebar>) {
-  const { userInfo, setNavTitle } = useZustandStore()
+  const { userInfo, setNavTitle, activeTab, setActiveTab } = useZustandStore()
   const [activeItem, setActiveItem] = React.useState<NavSidebarGroupItem>(navMainItems[0])
-  const { activeTab, setActiveTab } = useZustandStore()
   const activeNavMainItem = useActiveNavMainItemByURI()
   const { pathname } = useLocation()
   const navigate = useNavigate()
+  const isAdmin = useIsAdmin()
 
   const username = userInfo.username || 'user'
   const user = {
@@ -76,6 +78,10 @@ export function Sidebar({ ...props }: React.ComponentProps<typeof ShadUISidebar>
     }
   }, [pathname])
 
+  const filteredItems = navMainItems.filter(
+    item => isAdmin || item.url === URIs.dashboard || item.url === URIs.logs || item.url === URIs.users
+  )
+
   return (
     <ShadUISidebar collapsible="icon" variant="sidebar" {...props}>
       {/* 顶部区域 */}
@@ -100,7 +106,7 @@ export function Sidebar({ ...props }: React.ComponentProps<typeof ShadUISidebar>
 
       {/* 内容区 */}
       <SidebarContent>
-        <NavyPrimary items={navMainItems} activeItem={activeItem} onItemClick={item => getOnItemClick(item)} />
+        <NavyPrimary items={filteredItems} activeItem={activeItem} onItemClick={item => getOnItemClick(item)} />
       </SidebarContent>
 
       {/* 底部区域 */}

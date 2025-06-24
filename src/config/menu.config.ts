@@ -34,14 +34,6 @@ type NavMainItem = NavSidebarGroupItem & {
   closable?: boolean
 }
 
-const menuConfig: MenuItem[] = [
-  { name: '首页', path: URIs.root },
-  { name: '任务管理', path: URIs.tasks },
-  { name: '调度日志', path: URIs.logs },
-  { name: '执行器管理', path: URIs.executors },
-  { name: '用户管理', path: URIs.users },
-]
-
 const navMainItems: NavMainItem[] = [
   { title: '工作台', url: URIs.dashboard, icon: LayoutDashboard },
   { title: '任务管理', url: URIs.tasks, icon: ListChecks },
@@ -59,4 +51,4 @@ function useActiveNavMainItemByURI(url?: string) {
   return found || navMainItems[0]
 }
 
-export { navMainItems, menuConfig, useActiveNavMainItemByURI }
+export { navMainItems, useActiveNavMainItemByURI }

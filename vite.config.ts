@@ -22,12 +22,17 @@ export default defineConfig(({ mode }) => {
       allowedHosts: ['.fgct.cc', 'localhost'],
       open: isTrue(env.VITE_OPEN_BROWSER),
       proxy: {
+        '/api': {
+          target: env.VITE_PROXY_TARGET,
+          changeOrigin: true,
+          rewrite: path => path.replace(/^\/api/, '/api'),
+        },
         '/job': {
           target: env.VITE_PROXY_TARGET,
           changeOrigin: true,
           rewrite: path => path.replace(/^\/job/, '/job'),
         },
-        '/api': {
+        '/xxl-job-admin': {
           target: env.VITE_PROXY_TARGET,
           changeOrigin: true,
           rewrite: path => path.replace(/^\/api/, '/api'),
@@ -40,15 +45,6 @@ export default defineConfig(({ mode }) => {
       target: 'esnext',
       outDir: 'dist',
       assetsDir: 'assets',
-      // rollupOptions: {
-      //   output: {
-      //     manualChunks(id) {
-      //       if (id.includes('node_modules')) {
-      //         return id.toString().split('node_modules/')[1].split('/')[0].toString()
-      //       }
-      //     },
-      //   },
-      // },
     },
 
     css: {

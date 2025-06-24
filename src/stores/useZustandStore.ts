@@ -30,6 +30,7 @@ const useZustandStore = create<{
   /* state defined */
   token: string
   userInfo: User.Info
+  userRole: User.Role
   collapsed: boolean
   isDarkEnable: boolean
   activeTab: string
@@ -39,6 +40,7 @@ const useZustandStore = create<{
   /* setters */
   setToken: (token: string) => void
   setUserInfo: (userInfo: User.Info) => void
+  setUserRole: (role: User.Role) => void
   setCollapsed: () => void
   setIsDarkEnable: () => void
   setActiveTab: (activeTab: string) => void
@@ -49,8 +51,12 @@ const useZustandStore = create<{
   /* state init value */
   token: '',
   userInfo: ((): User.Info => {
-    const stored = storage.get('user-info') as User.Info
+    const stored = storage.get('user') as User.Info
     return stored && typeof stored === 'object' ? stored : ({} as User.Info)
+  })(),
+  userRole: ((): User.Role => {
+    const stored = storage.get('role') as User.Role
+    return stored && typeof stored === 'object' ? stored : ({} as User.Role)
   })(),
   collapsed: isTrue(storage.get('collapsed')),
   isDarkEnable: isTrue(storage.get('enableDark')),
@@ -62,8 +68,13 @@ const useZustandStore = create<{
   setToken: (token: string) => set(() => ({ token })),
   setUserInfo: (userInfo: User.Info) => {
     set(() => ({ userInfo }))
-    storage.set('user-info', userInfo)
+    storage.set('user', userInfo)
     logStateUpdate(userInfo)
+  },
+  setUserRole: (role: User.Role) => {
+    set(() => ({ userRole: role }))
+    storage.set('role', role)
+    logStateUpdate(role)
   },
   setCollapsed: () => {
     set(state => {

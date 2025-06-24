@@ -44,7 +44,7 @@ const components = {
   logs: <Lazy Render={lazy(() => import('@/pages/logger'))} />,
   executors: <Lazy Render={lazy(() => import('@/pages/executor'))} />,
   users: <Lazy Render={lazy(() => import('@/pages/user'))} />,
-  overflow: <Lazy Render={lazy(() => import('@/pages/extra/OverflowTest'))} />,
+  overflow: <Lazy Render={lazy(() => import('@/pages/overflow/OverflowTest'))} />,
 }
 
 function wrapProtectedRoutes(routes: IRouteObject[]): IRouteObject[] {

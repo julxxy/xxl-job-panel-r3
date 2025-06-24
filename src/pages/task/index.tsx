@@ -268,7 +268,7 @@ export default function TaskManageComponent() {
 
   async function handleRunOnce({
     id,
-    executorParam,
+    executorParam = '',
     addressList,
   }: {
     id: number | string

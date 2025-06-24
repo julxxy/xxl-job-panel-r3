@@ -63,8 +63,8 @@ export function NavUser({
       toast.success('登出成功')
       storage.clear()
       setTimeout(() => {
-        location.href = URIs.auth.login
-      }, 1000)
+        location.href = `${URIs.auth.login}?callback=${encodeURIComponent(location.href)}`
+      }, 1500)
     }
   }
 

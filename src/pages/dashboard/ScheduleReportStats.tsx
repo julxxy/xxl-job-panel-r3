@@ -56,7 +56,7 @@ function ScheduleReportStats() {
         {/* 使用 StatCard 组件来渲染每个卡片 */}
         <StatCard
           icon="📊"
-          title="任务总数"
+          title={'任务总数'}
           value={data?.content?.jobInfoCount ?? 0}
           backgroundColor="var(--bg-color-1)"
         />

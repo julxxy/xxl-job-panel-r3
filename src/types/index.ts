@@ -46,6 +46,11 @@ export namespace User {
     username: string
   }
 
+  export interface Role {
+    role: number
+    username: string
+  }
+
   export interface UserPageQuery {
     start?: number // 分页起始位置，默认 0
     length?: number // 分页长度，默认 10

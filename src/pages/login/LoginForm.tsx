@@ -22,16 +22,16 @@ import { Button } from '@/components/ui/button.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { Label } from '@/components/ui/label.tsx'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import api from '@/api'
 import storage from '@/utils/storage.ts'
 import { toast } from 'sonner'
-import { log } from '@/common/Logger.ts'
+import { isDebugEnable, log } from '@/common/Logger.ts'
 import useZustandStore from '@/stores/useZustandStore.ts'
 import { LogInIcon } from 'lucide-react'
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form'>) {
-  const { setUserInfo } = useZustandStore()
+  const { userRole, setUserInfo, setUserRole } = useZustandStore()
   const [rememberMe, setRememberMe] = useState(true)
   const [loading, setLoading] = useState(false)
 
@@ -51,8 +51,12 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
       if (code === 200) {
         const _userInfo = { username: userName }
         setUserInfo(_userInfo)
+        const { code, content } = await api.user.getUserRole(userName)
+        if (code === 200) {
+          await handleRoleUpdate(content)
+        }
         storage.set('token', userName)
-        toast.success('登录成功')
+        toast.success(`登录成功, 欢迎 ${userName}`)
         setTimeout(() => {
           const urlSearchParams = new URLSearchParams(window.location.search)
           location.href = urlSearchParams.get('callback') || '/'
@@ -66,6 +70,20 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
       setLoading(false)
     }
   }
+
+  const handleRoleUpdate = async (content: any) => {
+    setUserRole({ ...content })
+    if (isDebugEnable) {
+      log.debug('content: ', content)
+      log.debug('userRole (may not updated): ', userRole)
+    }
+  }
+
+  useEffect(() => {
+    if (isDebugEnable) {
+      log.debug('user role updated: ', userRole)
+    }
+  }, [userRole])
 
   return (
     <form className={cn('flex flex-col gap-6', className)} onSubmit={onSubmit} {...props}>
