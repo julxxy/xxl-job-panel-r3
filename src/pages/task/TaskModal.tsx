@@ -222,7 +222,8 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
     }
 
     // 返回 true=成功，false=失败
-    async function handleCreate(values: Job.JobItem) {
+    async function handleCreate(values: Job.JobItem = {} as Job.JobItem) {
+      values.executorHandler = values?.executorHandler ?? ''
       const { code, msg, content } = await api.job.addJob(values)
       handleToastMsg(code, msg)
       if (code === 200) {
@@ -233,7 +234,8 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
       return false
     }
 
-    async function handleEdit(values: Job.JobItem) {
+    async function handleEdit(values: Job.JobItem = {} as Job.JobItem) {
+      values.executorHandler = values?.executorHandler ?? ''
       const { code, msg } = await api.job.editJob(values)
       await updateGlueVersion(values)
       if (code === 200) {
