@@ -40,6 +40,9 @@ export default {
     login(params: LoginParams) {
       return apiClient.post<Result>('/login', undefined, { params })
     },
+    loginByLdap(params: LoginParams) {
+      return apiClient.post<Result>('/r3/support/v1/login/ldap', undefined, { params })
+    },
     logout() {
       return apiClient.post<Result>('/logout', undefined)
     },

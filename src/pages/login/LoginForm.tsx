@@ -80,9 +80,48 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
   }
 
   function onLdapLogin() {
-    if (isDebugEnable) {
-      log.debug('On ldap login.')
+    const form = document.querySelector('form')
+    if (!form) return
+    const formData = new FormData(form)
+    const userName = formData.get('userName') as string
+    const password = formData.get('password') as string
+
+    // 简单参数校验
+    if (!userName || !password) {
+      toast.error('请输入账号和密码')
+      return
     }
+
+    setLoading(true)
+    api.user
+      .loginByLdap({
+        userName,
+        password,
+        ifRemember: rememberMe,
+      })
+      .then(async ({ code, msg }) => {
+        if (code === 200) {
+          const _userInfo = { username: userName }
+          setUserInfo(_userInfo)
+          const { code, content } = await api.user.getUserRole(userName)
+          if (code === 200) {
+            await handleRoleUpdate(content)
+          }
+          storage.set('token', userName)
+          toast.success(`LDAP登录成功, 欢迎 ${userName}`)
+          setTimeout(() => {
+            const urlSearchParams = new URLSearchParams(window.location.search)
+            location.href = urlSearchParams.get('callback') || '/'
+          }, 800)
+        } else {
+          toast.error(msg)
+          setLoading(false)
+        }
+      })
+      .catch(e => {
+        log.error('LDAP 登录失败:', e)
+        setLoading(false)
+      })
   }
 
   useEffect(() => {
@@ -95,12 +134,19 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
     <form className={cn('flex flex-col gap-6', className)} onSubmit={onSubmit} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">欢迎回来</h1>
-        <p className="text-balance text-sm text-muted-foreground">使用你的 xxl-job 账号登录</p>
+        <p className="text-balance text-sm text-muted-foreground">可用 XXL-JOB 账号或企业域账号（LDAP）登录</p>
       </div>
       <div className="grid gap-6">
         <div className="grid gap-2">
           <Label htmlFor="userName">账号</Label>
-          <Input id="userName" name="userName" type="text" defaultValue="admin" required />
+          <Input
+            id="userName"
+            name="userName"
+            type="text"
+            placeholder="XXL-JOB 用户名或企业域账号"
+            defaultValue=""
+            required
+          />
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
@@ -112,7 +158,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             placeholder="请输入密码"
             type="password"
             required={false}
-            defaultValue="123456"
+            defaultValue=""
           />
         </div>
         <div className="flex items-center space-x-2">
@@ -132,23 +178,16 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
           <span className="bg-card text-muted-foreground relative z-10 px-2">或者继续使用以下方式登录</span>
         </div>
         <div className="grid grid-cols-3 gap-4">
-          <Button variant="outline" type="button" className="w-full" onClick={onLdapLogin} disabled={loading}>
-            <svg
-              className="icon"
-              viewBox="0 0 1024 1024"
-              version="1.1"
-              xmlns="http://www.w3.org/2000/svg"
-              width="256"
-              height="256"
-            >
-              <path
-                d="M927.004444 776.732444V257.137778a36.408889 36.408889 0 0 0-36.380444-36.408889H135.224889V162.986667c0-20.138667 16.355556-36.408889 36.408889-36.408889h810.296889c20.110222 0 36.408889 16.298667 36.408889 36.408889v576.995555a36.408889 36.408889 0 0 1-36.039112 36.750222H927.004444z m-45.027555-473.088v576.341334a36.408889 36.408889 0 0 1-36.408889 36.408889H36.408889A36.408889 36.408889 0 0 1 0 879.985778v-576.284445c0-20.138667 16.270222-36.408889 36.408889-36.408889h809.102222c20.053333 0 36.323556 16.270222 36.323556 36.408889l0.142222-0.056889zM164.750222 671.488H73.500444V464.497778H21.390222v250.624h143.36v-43.633778z m117.845334-206.990222h-84.764445v250.624h84.48a129.308444 129.308444 0 0 0 93.838222-35.328 123.022222 123.022222 0 0 0 36.323556-93.070222c0-81.464889-43.292444-122.225778-129.820445-122.225778h-0.056888z m295.68 0h-61.525334l-89.429333 250.624h56.746667l17.806222-57.514667h88.718222l18.574222 57.457778h56.746667L578.275556 464.497778z m202.524444 0h-83.968v250.624h52.024889v-87.296h26.88a99.982222 99.982222 0 0 0 68.721778-22.528 75.946667 75.946667 0 0 0 27.648-61.525334c0-53.077333-30.549333-79.274667-91.306667-79.274666z m-9.415111 122.140444h-22.528v-80.753778h22.869333a37.660444 37.660444 0 0 1 45.482667 39.651556 38.428444 38.428444 0 0 1-45.824 41.102222z m-230.229333-53.361778c2.190222-7.025778 3.669333-14.136889 4.380444-21.475555h1.422222c0.398222 7.537778 1.678222 14.933333 3.640889 22.186667l27.676445 86.926222h-65.137778l28.017778-87.608889z m-262.570667 141.937778h-28.387556v-163.328h28.017778a79.957333 79.957333 0 0 1 57.457778 20.764445c15.473778 15.473778 23.495111 36.750222 22.186667 58.510222a86.044444 86.044444 0 0 1-21.134223 61.44 76.032 76.032 0 0 1-58.140444 22.528v0.085333z"
-                fill="#515151"
-              ></path>
+          <Button variant="outline" type="button" onClick={onLdapLogin} disabled={loading}>
+            <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="256" height="256">
+              <path d="M191.5 818.6c0-24.1-19.5-43.6-43.6-43.6H60.6C36.5 775 17 794.5 17 818.6s19.5 43.6 43.6 43.6h87.3c24.1 0 43.6-19.5 43.6-43.6zM60.6 644.1h87.3c24.1 0 43.6-19.5 43.6-43.6s-19.5-43.6-43.6-43.6H60.6c-24.1 0-43.6 19.5-43.6 43.6 0 24 19.5 43.6 43.6 43.6zM60.6 425.9h87.3c24.1 0 43.6-19.5 43.6-43.6s-19.5-43.6-43.6-43.6H60.6c-24.1 0-43.6 19.5-43.6 43.6 0 24 19.5 43.6 43.6 43.6zM60.6 207.7h87.3c24.1 0 43.6-19.5 43.6-43.6s-19.5-43.6-43.6-43.6H60.6C36.5 120.4 17 140 17 164.1s19.5 43.6 43.6 43.6zM463.3 455.4c-14.4-8.3-32.8-3.4-41.2 11-8.3 14.4-3.4 32.8 11 41.2 14.4 8.3 32.8 3.4 41.2-11 8.3-14.4 3.4-32.8-11-41.2zM569.4 233.9l-71.6 124c-1 1.8-0.4 4.1 1.4 5.1s4.1 0.4 5.1-1.4l71.6-124c1-1.8 0.4-4.1-1.4-5.1s-4.1-0.4-5.1 1.4z" />
+              <path d="M955.1 76.8H846c0-24.1-19.5-43.6-43.6-43.6H126c-24.1 0-43.6 19.5-43.6 43.6v21.8h65.5c36.1 0 65.5 29.3 65.5 65.5s-29.3 65.5-65.5 65.5H82.4v87.3h65.5c36.1 0 65.5 29.3 65.5 65.5s-29.3 65.5-65.5 65.5H82.4V535h65.5c36.1 0 65.5 29.3 65.5 65.5 0 36.1-29.3 65.5-65.5 65.5H82.4v87.3h65.5c36.1 0 65.5 29.3 65.5 65.5 0 36.1-29.3 65.5-65.5 65.5H82.4v65.5c0 24.1 19.5 43.6 43.6 43.6h676.4c24.1 0 43.6-19.5 43.6-43.6V928h109.1c24.1 0 43.6-19.5 43.6-43.6v-764c0.1-24.1-19.5-43.6-43.6-43.6zM351.3 855.2h-97.7V693.8h32.3v134.4h65.5v27z m33.7-445c19.7-34.1 58.2-50.4 94.8-43.6l90.9-157.4c1.4-2.4 3.7-4.2 6.4-4.9l26.7-7.2c5.6-1.5 11.4 1.8 12.9 7.5l7.2 26.7c0.7 2.7 0.3 5.6-1.1 8l-16.7 28.8 26.1 15.1c7.2 4.2 9.7 13.4 5.5 20.6-4.2 7.2-13.4 9.7-20.6 5.5L591 294.2l-7.5 13.1 26.1 15.1c7.2 4.2 9.7 13.4 5.5 20.6-4.2 7.2-13.4 9.7-20.6 5.5l-26.1-15.1-7.5 13.1 26.1 15.1c7.2 4.2 9.7 13.4 5.5 20.6-4.2 7.2-13.4 9.7-20.6 5.5l-26.1-15.1-13.8 24.2c24.2 28.3 29.3 69.8 9.6 103.9-25 43.2-80.3 58.1-123.5 33.1-43.3-25-58.1-80.3-33.1-123.6z m102.9 424.7c-13.7 13.5-32.7 20.3-56.9 20.3h-46V693.8h44.3c25.3 0 44.8 6.5 58.5 19.6 14.3 13.7 21.4 33.8 21.4 60.4s-7.2 47-21.3 61.1z m142.7 20.3l-11.3-41.5h-52.4l-11.3 41.5h-32.7l51.7-161.5h38l51.9 161.5h-33.9zM787 785c-11.1 8.6-25.8 12.9-44.3 12.9h-21.6v57.4h-32.3V693.8h53c42.2 0 63.3 16.9 63.3 50.6 0 17.6-6 31.1-18.1 40.6z m146.3 77.2H846V731.3h87.3v130.9z m0-196.3H846V535h87.3v130.9z m0-196.4H846V338.6h87.3v130.9z m0-196.4H846V142.2h87.3v130.9z" />
+              <path d="M600.3 744.8c-3.6-14.1-6-23-7-26.6h-0.9c-4.1 17.5-8.7 35-13.7 52.8l-4.8 17.7h38.4l-4.8-17.7c-1.9-6.4-4.3-15.1-7.2-26.2zM427.3 719.5h-10v109.8h10c32.6 0 48.9-18.5 48.9-55.4-0.1-36.3-16.4-54.4-48.9-54.4zM739.5 719.3h-18.3v53h19.4c22 0 33-9.3 33-27.9 0-9-2.9-15.6-8.7-19.6-5.5-3.7-13.9-5.5-25.4-5.5z" />
             </svg>
-            <span className="sr-only">Login with LDAP</span>
+            <span className="inline-flex items-center bg-muted text-sm font-bold px-1 py-0.5 rounded border-muted-foreground/20">
+              LDAP
+            </span>
           </Button>
-
           <Button variant="outline" type="button" className="w-full" disabled>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path

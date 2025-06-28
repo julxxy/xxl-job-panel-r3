@@ -120,13 +120,22 @@ export default function UserComponent() {
     [confirm]
   )
 
-  const handleUserDelete = (id: number) => {
-    confirmDelete([id], `删除操作不可撤销，是否继续？ID: ${id}.`)
+  const handleUserDelete = (record: User.UserRecord) => {
+    if (record.username === 'admin') {
+      toast.error('超级管理员账号 admin 不允许删除')
+      return
+    }
+    confirmDelete([record.id], `删除操作不可撤销，是否继续？ID: ${record.id}.`)
   }
 
   const handleBatchDelete = () => {
     if (userIds.length === 0) {
       toast.warning('请选择需要删除的用户')
+      return
+    }
+    const usersToDelete = tableProps.dataSource?.filter((u: User.UserRecord) => userIds.includes(u.id)) || []
+    if (usersToDelete.some(u => u.username === 'admin')) {
+      toast.error('超级管理员账号 admin 不允许删除')
       return
     }
     confirmDelete(userIds, `将删除 ${userIds.length} 个用户，操作不可恢复。`)
@@ -149,7 +158,7 @@ export default function UserComponent() {
             <EditIcon />
             编辑
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => handleUserDelete(record.id)}>
+          <Button size="sm" variant="ghost" onClick={() => handleUserDelete(record)}>
             <DeleteIcon />
             删除
           </Button>
