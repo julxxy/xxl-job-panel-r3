@@ -157,8 +157,8 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             name="password"
             placeholder="请输入密码"
             type="password"
-            required={false}
             defaultValue="123456"
+            required
           />
         </div>
         <div className="flex items-center space-x-2">
