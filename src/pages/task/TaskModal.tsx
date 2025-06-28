@@ -202,6 +202,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
 
   async function handleSubmit() {
     const fieldsValue = form.getFieldsValue()
+    fieldsValue.executorHandler = fieldsValue?.executorHandler ?? ''
     if (isDebugEnable) log.info(`操作: ${action} :`, fieldsValue)
 
     if (fieldsValue.scheduleType === 'NONE') {
@@ -223,7 +224,6 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
 
     // 返回 true=成功，false=失败
     async function handleCreate(values: Job.JobItem = {} as Job.JobItem) {
-      values.executorHandler = values?.executorHandler ?? ''
       const { code, msg, content } = await api.job.addJob(values)
       handleToastMsg(code, msg)
       if (code === 200) {
@@ -235,7 +235,6 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
     }
 
     async function handleEdit(values: Job.JobItem = {} as Job.JobItem) {
-      values.executorHandler = values?.executorHandler ?? ''
       const { code, msg } = await api.job.editJob(values)
       await updateGlueVersion(values)
       if (code === 200) {
