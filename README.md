@@ -8,8 +8,8 @@
 
 ## 📱 Mobile Preview
 
-|       ![Mobile 1](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619222705924_20250619222706.png)       |       ![Mobile 2](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223126757_20250619223126.png)       |       ![Mobile 3](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223227140_20250619223227.png)       |
-| :---------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------: |
+|   ![Mobile 1](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/gif-2025-06-28%20at%2021.58.15_20250628215849.gif)    |       ![Mobile 2](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223126757_20250619223126.png)       |       ![Mobile 3](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223227140_20250619223227.png)       |
+|:-----------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------:|
 |       ![Mobile 4](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223501043_20250619223501.png)       |       ![Mobile 5](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223807392_20250619223807.png)       |       ![Mobile 6](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223937925_20250619223938.png)       |
 | ![Mobile 7](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/iShot%20Pro%202025-06-19%2022.44.07_20250619224523.png) | ![Mobile 8](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/iShot%20Pro%202025-06-19%2022.44.42_20250619224534.png) | ![Mobile 9](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/iShot%20Pro%202025-06-19%2022.45.05_20250619224546.png) |
 
@@ -17,12 +17,12 @@
 
 ## 💻 Desktop Preview
 
-| ![Desktop 1](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619220802169_20250619220803.png) | ![Desktop 2](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619220914127_20250619220914.png)  |
-| :----------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: |
-| ![Desktop 3](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221728812_20250619221728.png) | ![Desktop 4](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221345225_20250619221345.png)  |
-| ![Desktop 5](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221007810_20250619221007.png) | ![Desktop 6](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221112753_20250619221112.png)  |
-| ![Desktop 7](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221148168_20250619221148.png) | ![Desktop 8](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221941926_20250619221942.png)  |
-| ![Desktop 9](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619222411265_20250619222411.png) | ![Desktop 10](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619222451538_20250619222451.png) |
+| ![Desktop 1](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/gif-2025-06-28%20at%2021.25.20_20250628212733.gif) | ![Desktop 2](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619220914127_20250619220914.png)  |
+|:--------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------:|
+| ![Desktop 3](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221728812_20250619221728.png)        | ![Desktop 4](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221345225_20250619221345.png)  |
+| ![Desktop 5](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221007810_20250619221007.png)        | ![Desktop 6](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221112753_20250619221112.png)  |
+| ![Desktop 7](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221148168_20250619221148.png)        | ![Desktop 8](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221941926_20250619221942.png)  |
+| ![Desktop 9](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619222411265_20250619222411.png)        | ![Desktop 10](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619222451538_20250619222451.png) |
 
 ---
 
@@ -81,7 +81,7 @@ yarn preview
 ## Scripts
 
 | Script            | Description                     |
-| ----------------- | ------------------------------- |
+|-------------------|---------------------------------|
 | `npm run dev`     | Start development server (Vite) |
 | `npm run build`   | Build for production            |
 | `npm run preview` | Preview the production build    |
