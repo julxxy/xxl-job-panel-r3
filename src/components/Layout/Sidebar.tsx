@@ -53,9 +53,10 @@ export function Sidebar({ ...props }: React.ComponentProps<typeof ShadUISidebar>
   const isAdmin = useIsAdmin()
 
   const username = userInfo.username || 'user'
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username)
   const user = {
     name: username,
-    email: username + '@example.com',
+    email: isEmail ? username : username + '@example.com',
     avatar: 'https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/Hanfu_2.png',
   }
 
