@@ -8,9 +8,9 @@
 
 ## 📱 Mobile Preview
 
-| ![Mobile 1](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/gif-2025-06-29%20at%2015.18.19_20250629151930.gif) | ![Mobile 2](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223126757_20250619223126.png) | ![Mobile 3](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223227140_20250619223227.png) |
-| :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-| ![Mobile 4](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223501043_20250619223501.png) | ![Mobile 5](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223807392_20250619223807.png) | ![Mobile 6](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223937925_20250619223938.png) |
+|   ![Mobile 1](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/gif-2025-06-28%20at%2021.58.15_20250628215849.gif)    |       ![Mobile 2](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223126757_20250619223126.png)       |       ![Mobile 3](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223227140_20250619223227.png)       |
+|:-----------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------:|
+|       ![Mobile 4](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223501043_20250619223501.png)       |       ![Mobile 5](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223807392_20250619223807.png)       |       ![Mobile 6](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223937925_20250619223938.png)       |
 | ![Mobile 7](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/iShot%20Pro%202025-06-19%2022.44.07_20250619224523.png) | ![Mobile 8](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/iShot%20Pro%202025-06-19%2022.44.42_20250619224534.png) | ![Mobile 9](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/iShot%20Pro%202025-06-19%2022.45.05_20250619224546.png) |
 
 ---
@@ -100,6 +100,21 @@ yarn preview
 - **Radix UI**
 - **Ant Design 5**
 - **Zustand** (state management)
+
+---
+
+## Version Mapping
+
+This table helps you quickly identify which front-end and back-end versions are compatible. Whenever a major update
+occurs on either side, please update this table accordingly for clarity.
+
+|                     **xxl-job-panel-r3** (Front-end)                     |                     **xxl-job-r3** (Back-end)                      | Description                                 |
+|:------------------------------------------------------------------------:|:------------------------------------------------------------------:|:--------------------------------------------|
+| [v1.0.2](https://github.com/julxxy/xxl-job-panel-r3/releases/tag/v1.0.2) | [v3.1.2](https://github.com/julxxy/xxl-job-r3/releases/tag/v3.1.2) | LDAP login supported, menu permission fixes |
+
+> **How to maintain:**
+> Whenever the front-end or back-end receives significant updates, please record the new mapping here. Link each version
+> to its corresponding release and summarize the key changes for future reference.
 
 ---
 
