@@ -238,7 +238,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
       const { code, msg } = await api.job.editJob(values)
       handleToastMsg(code, msg)
       await updateGlueVersion(values)
-      return code === 200;
+      return code === 200
     }
 
     let ok: boolean
@@ -520,7 +520,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
                                 '\n当前MD5:',
                                 newMd5,
                                 '\n是否变更:',
-                                newMd5 !== initialGlueSourceMd5Ref.current,
+                                newMd5 !== initialGlueSourceMd5Ref.current
                               )
                             }
                           }}
