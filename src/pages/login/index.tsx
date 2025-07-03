@@ -19,17 +19,15 @@
 
 import { LoginForm } from '@/pages/login/LoginForm.tsx'
 import { Clock } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 
 export default function LoginPage() {
-  const navigate = useNavigate()
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
           <span
             role="link"
-            onClick={() => navigate('/')}
+            onClick={() => window.open('https://github.com/julxxy/xxl-job-r3.git', '_blank')}
             className="cursor-pointer flex items-center gap-2 font-medium no-underline text-inherit"
           >
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">

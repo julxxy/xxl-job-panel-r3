@@ -97,7 +97,12 @@ export function Sidebar({ ...props }: React.ComponentProps<typeof ShadUISidebar>
                 <Clock className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{import.meta.env.VITE_APP_NAME}</span>
+                <span
+                  className="truncate font-medium"
+                  onClick={() => window.open('https://github.com/julxxy/xxl-job-r3.git', '_blank')}
+                >
+                  {import.meta.env.VITE_APP_NAME}
+                </span>
                 <span className="truncate text-xs">{import.meta.env.VITE_APP_VERSION}</span>
               </div>
             </SidebarMenuButton>
