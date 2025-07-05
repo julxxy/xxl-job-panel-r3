@@ -9,7 +9,7 @@
 ## 📱 Mobile Preview
 
 |   ![Mobile 1](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/gif-2025-06-28%20at%2021.58.15_20250628215849.gif)    |       ![Mobile 2](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223126757_20250619223126.png)       |       ![Mobile 3](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223227140_20250619223227.png)       |
-| :---------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------: |
+|:-----------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------:|
 |       ![Mobile 4](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223501043_20250619223501.png)       |       ![Mobile 5](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223807392_20250619223807.png)       |       ![Mobile 6](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619223937925_20250619223938.png)       |
 | ![Mobile 7](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/iShot%20Pro%202025-06-19%2022.44.07_20250619224523.png) | ![Mobile 8](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/iShot%20Pro%202025-06-19%2022.44.42_20250619224534.png) | ![Mobile 9](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/iShot%20Pro%202025-06-19%2022.45.05_20250619224546.png) |
 
@@ -18,7 +18,7 @@
 ## 💻 Desktop Preview
 
 | ![Desktop 1](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/gif-2025-06-28%20at%2021.25.20_20250628212733.gif) | ![Desktop 2](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619220914127_20250619220914.png)  |
-| :------------------------------------------------------------------------------------------------------------------ | :-----------------------------------------------------------------------------------------------------------: |
+|:--------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------:|
 | ![Desktop 3](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221728812_20250619221728.png)        | ![Desktop 4](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221345225_20250619221345.png)  |
 | ![Desktop 5](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221007810_20250619221007.png)        | ![Desktop 6](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221112753_20250619221112.png)  |
 | ![Desktop 7](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221148168_20250619221148.png)        | ![Desktop 8](https://weasley.oss-cn-shanghai.aliyuncs.com/Photos/image-20250619221941926_20250619221942.png)  |
@@ -81,7 +81,7 @@ yarn preview
 ## Scripts
 
 | Script            | Description                     |
-| ----------------- | ------------------------------- |
+|-------------------|---------------------------------|
 | `npm run dev`     | Start development server (Vite) |
 | `npm run build`   | Build for production            |
 | `npm run preview` | Preview the production build    |
@@ -105,12 +105,13 @@ yarn preview
 
 ## Version Mapping
 
-This table helps you quickly identify which front-end and back-end versions are compatible. Whenever a major update
-occurs on either side, please update this table accordingly for clarity.
+Quickly check which front-end and back-end versions are compatible. Update this table whenever either side has a major
+change.
 
-|                     **xxl-job-panel-r3** (Front-end)                     |                     **xxl-job-r3** (Back-end)                      | Description                                 |
-| :----------------------------------------------------------------------: | :----------------------------------------------------------------: | :------------------------------------------ |
-| [v1.0.2](https://github.com/julxxy/xxl-job-panel-r3/releases/tag/v1.0.2) | [v3.1.2](https://github.com/julxxy/xxl-job-r3/releases/tag/v3.1.2) | LDAP login supported, menu permission fixes |
+|                     **xxl-job-panel-r3** (Front-end)                     |                     **xxl-job-r3** (Back-end)                      | Description                                                                                                                                         |
+|:------------------------------------------------------------------------:|:------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------|
+| [v1.0.2](https://github.com/julxxy/xxl-job-panel-r3/releases/tag/v1.0.2) | [v3.1.2](https://github.com/julxxy/xxl-job-r3/releases/tag/v3.1.2) | LDAP login supported, menu permission fixes                                                                                                         |
+| [v1.0.3](https://github.com/julxxy/xxl-job-panel-r3/releases/tag/v1.0.3) | [v3.1.2](https://github.com/julxxy/xxl-job-r3/releases/tag/v3.1.2) | - Added new favicon.svg and multiple SVG icons, <br>- improved LDAP login button styling, enabled logo to redirect to GitHub, upgraded dependencies |
 
 > **How to maintain:**
 > Whenever the front-end or back-end receives significant updates, please record the new mapping here. Link each version
