@@ -1658,10 +1658,10 @@ ansi-styles@^4.1.0:
   dependencies:
     color-convert "^2.0.1"
 
-antd@^5.26.5:
-  version "5.26.5"
-  resolved "https://registry.npmmirror.com/antd/-/antd-5.26.5.tgz#e324b028753df763b494034634a6dc991a959e95"
-  integrity sha512-HB7Cr0tPZMMeAyDDH8KZU0aP8/uO51oasmflJhDBzaRRZmLT8Pyjtt8qS22Sc839glm8gpKQcaG0mln66Gt9Fg==
+antd@^5.26.6:
+  version "5.26.6"
+  resolved "https://registry.npmmirror.com/antd/-/antd-5.26.6.tgz#cdfd0aa02e6a9762ef26b4cc6d69f5d1bfbdf372"
+  integrity sha512-k8ipeT+UL2tP/x4jHTXElScAxsD94JgrIEeGHj80nNO4dL9hqcmaOUBpHo3ieCf6MFjhS7gLUthysQeP6e7DUg==
   dependencies:
     "@ant-design/colors" "^7.2.1"
     "@ant-design/cssinjs" "^1.23.0"
