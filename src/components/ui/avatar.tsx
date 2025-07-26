@@ -17,8 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-'use client'
-
 import * as React from 'react'
 import * as AvatarPrimitive from '@radix-ui/react-avatar'
 
