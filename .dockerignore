@@ -1,0 +1,54 @@
+# Node modules
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 构建输出
+dist
+build
+
+# 开发环境文件 - 重要：排除本地开发配置
+.env.developer_local
+.env.local
+
+# IDE 文件
+.vscode
+.idea
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# 文档
+README.md
+*.md
+
+# Docker 相关
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# 测试
+coverage
+*.lcov
+
+# 日志
+logs
+*.log
+
+# 运行时
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# 缓存
+.cache
+.parcel-cache
