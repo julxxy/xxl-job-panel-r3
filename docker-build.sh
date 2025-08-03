@@ -348,9 +348,3 @@ if [ "$TEST_MODE" = true ]; then
   echo -e "docker run -d --name xxl-job-panel-test -p 81:80 ${DOCKER_USERNAME}/${IMAGE_NAME}"
 fi
 
-echo - e "${GREEN}🚀 感谢使用 XXL-JOB Panel R3 Docker 构建脚本！${NC}"
-
-docker run -d --name xxl-job-panel-r3 -p 80:80 \
-  -e PROXY_TARGET=http://192.168.31.23:8080 \
-  -e API_PROXY_PATH=/xxl-job-admin \
-  julxxy/xxl-job-panel-r3
