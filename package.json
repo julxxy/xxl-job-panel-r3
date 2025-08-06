@@ -55,14 +55,14 @@
     "recharts": "2.15.4",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
-    "zod": "^4.0.14",
+    "zod": "^4.0.15",
     "zustand": "^5.0.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@types/blueimp-md5": "2.18.2",
-    "@types/node": "^24.1.0",
+    "@types/node": "^24.2.0",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^4.7.0",
