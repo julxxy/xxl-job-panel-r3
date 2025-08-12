@@ -2,6 +2,21 @@
 
 > A third-party React-based web admin panel for XXL-JOB — delivering the best experience you’ve ever had.
 
+<p align="center">
+  <a href="https://hub.docker.com/r/julxxy/xxl-job-panel-r3">
+    <img src="https://img.shields.io/docker/pulls/julxxy/xxl-job-panel-r3?logo=docker&style=flat-square" alt="Docker Pulls"/>
+  </a>
+  <a href="https://hub.docker.com/r/julxxy/xxl-job-panel-r3">
+    <img src="https://img.shields.io/docker/image-size/julxxy/xxl-job-panel-r3/latest?logo=docker&style=flat-square" alt="Docker Image Size"/>
+  </a>
+  <a href="https://github.com/julxxy/xxl-job-panel-r3">
+    <img src="https://img.shields.io/github/stars/julxxy/xxl-job-panel-r3?logo=github&style=flat-square" alt="GitHub Stars"/>
+  </a>
+  <a href="https://hub.docker.com/r/julxxy/xxl-job-r3">
+    <img src="https://img.shields.io/badge/Backend-julxxy%2Fxxl--job--r3-blue?logo=docker&style=flat-square" alt="Backend"/>
+  </a>
+</p>
+
 ---
 
 ## Screenshots
