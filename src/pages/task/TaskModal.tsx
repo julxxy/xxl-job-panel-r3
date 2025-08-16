@@ -40,7 +40,7 @@ import { handleToastMsg, toast } from '@/utils/toast.ts'
 import md5 from 'blueimp-md5'
 import { Button } from '@/components/ui/button.tsx'
 import { IconTooltipButton } from '@/components/IconTooltipButton.tsx'
-import { ClipboardPaste, HistoryIcon, Move } from 'lucide-react'
+import { ClipboardPaste, HistoryIcon, Move, RefreshCcw, ZoomIn, ZoomOut } from 'lucide-react'
 import { formatDateToLocalString } from '@/utils'
 import Draggable from 'react-draggable'
 import {
@@ -51,6 +51,9 @@ import {
   validateJobHandler,
 } from '@/utils/formValidators.ts'
 import CronEditor from '@/components/CronEditor.tsx'
+
+// 默认编辑器高度
+const editorDefaultHeight = 240
 
 // 弹窗标题
 function getTitleText(action: IAction) {
@@ -82,6 +85,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
   const isFirstGlueTypeChange = useRef(true)
   const [editorCode, setEditorCode] = useState('')
   const [glueHistory, setGlueHistory] = useState<JobCodeGlue[]>([])
+  const [editorHeight, setEditorHeight] = useState(editorDefaultHeight)
   const [historyLoading, setHistoryLoading] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const isFirstScheduleTypeChange = useRef(false)
@@ -493,17 +497,41 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
                             <span>
                               {isGlueSourceChanged && <span className="text-yellow-500 ml-2">脚本已修改</span>}
                             </span>
-                            <IconTooltipButton
-                              size="sm"
-                              tooltip="历史版本"
-                              variant="ghost"
-                              icon={<HistoryIcon />}
-                              onClick={handleOpenHistory}
-                            />
+                            <div className="flex items-center">
+                              <IconTooltipButton
+                                size="sm"
+                                tooltip="放大"
+                                variant="ghost"
+                                icon={<ZoomIn />}
+                                onClick={() => setEditorHeight(editorHeight + 40)}
+                              />
+                              <IconTooltipButton
+                                size="sm"
+                                tooltip="缩小"
+                                variant="ghost"
+                                icon={<ZoomOut />}
+                                onClick={() => setEditorHeight(editorHeight - 40)}
+                                disabled={editorHeight <= 100}
+                              />
+                              <IconTooltipButton
+                                size="sm"
+                                tooltip="恢复默认高度"
+                                variant="ghost"
+                                icon={<RefreshCcw />}
+                                onClick={() => setEditorHeight(editorDefaultHeight)}
+                              />
+                              <IconTooltipButton
+                                size="sm"
+                                tooltip="历史版本"
+                                variant="ghost"
+                                icon={<HistoryIcon />}
+                                onClick={handleOpenHistory}
+                              />
+                            </div>
                           </div>
                         )}
                         <Editor
-                          height={240}
+                          height={editorHeight}
                           language={glueLangMap[glueType] || 'text'}
                           value={editorCode}
                           onChange={val => {

@@ -27,6 +27,7 @@ interface IconTooltipButtonProps {
   icon: ReactNode
   variant?: 'outline' | 'ghost' | 'default'
   size?: 'sm' | 'default' | 'lg'
+  disabled?: boolean
 }
 
 export function IconTooltipButton({
@@ -35,11 +36,12 @@ export function IconTooltipButton({
   icon,
   variant = 'outline',
   size = 'sm',
+  disabled = false,
 }: IconTooltipButtonProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button onClick={onClick} variant={variant} size={size}>
+        <Button onClick={onClick} variant={variant} size={size} disabled={disabled}>
           {icon}
         </Button>
       </TooltipTrigger>
