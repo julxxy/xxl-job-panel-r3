@@ -17,7 +17,7 @@ COPY . .
 RUN if [ -f yarn.lock ]; then yarn build; else npm run build; fi
 
 # 生产镜像
-FROM nginx:1.25-alpine
+FROM nginx:1.29.1-alpine
 
 # 安装必要工具
 RUN apk add --no-cache gettext curl
