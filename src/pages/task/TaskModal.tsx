@@ -504,6 +504,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
                                 variant="ghost"
                                 icon={<ZoomIn />}
                                 onClick={() => setEditorHeight(editorHeight + 40)}
+                                disabled={editorHeight >= 600}
                               />
                               <IconTooltipButton
                                 size="sm"
