@@ -120,17 +120,16 @@ yarn preview
 
 ## Version Mapping
 
-Quickly check which front-end and back-end versions are compatible. Update this table whenever either side has a major
-change.
+Check the compatibility between front-end and back-end versions: [doc/version-mapping.json](doc/version-mapping.json)
 
-|                     **xxl-job-panel-r3** (Front-end)                     |                     **xxl-job-r3** (Back-end)                      | Description                                                                                                                                         |
-|:------------------------------------------------------------------------:|:------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------|
-| [v1.0.2](https://github.com/julxxy/xxl-job-panel-r3/releases/tag/v1.0.2) | [v3.1.2](https://github.com/julxxy/xxl-job-r3/releases/tag/v3.1.2) | LDAP login supported, menu permission fixes                                                                                                         |
-| [v1.0.3](https://github.com/julxxy/xxl-job-panel-r3/releases/tag/v1.0.3) | [v3.1.2](https://github.com/julxxy/xxl-job-r3/releases/tag/v3.1.2) | - Added new favicon.svg and multiple SVG icons, <br>- improved LDAP login button styling, enabled logo to redirect to GitHub, upgraded dependencies |
+|                              **Front-end**                               |                            **Back-end**                            | Description                                                                                                                                 |
+|:------------------------------------------------------------------------:|:------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------|
+| [v1.0.2](https://github.com/julxxy/xxl-job-panel-r3/releases/tag/v1.0.2) | [v3.1.2](https://github.com/julxxy/xxl-job-r3/releases/tag/v3.1.2) | LDAP login supported, menu permission fixes                                                                                                 |
+| [v1.0.3](https://github.com/julxxy/xxl-job-panel-r3/releases/tag/v1.0.3) | [v3.1.2](https://github.com/julxxy/xxl-job-r3/releases/tag/v3.1.2) | Added new favicon.svg and multiple SVG icons, improved LDAP login button styling, enabled logo to redirect to GitHub, upgraded dependencies |
+|                                    …                                     |                                 …                                  | …                                                                                                                                           |
 
-> **How to maintain:**
-> Whenever the front-end or back-end receives significant updates, please record the new mapping here. Link each version
-> to its corresponding release and summarize the key changes for future reference.
+> **Maintenance Note:** Please update both the [doc/version-mapping.json](doc/version-mapping.json) file and the table
+> above when adding new versions.
 
 ---
 
