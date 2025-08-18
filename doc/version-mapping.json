@@ -3,12 +3,12 @@
     {
       "frontend": {
         "name": "xxl-job-panel-r3",
-        "version": "v1.0.2",
+        "version": "1.0.2",
         "releaseUrl": "https://github.com/julxxy/xxl-job-panel-r3/releases/tag/v1.0.2"
       },
       "backend": {
         "name": "xxl-job-r3",
-        "version": "v3.1.2",
+        "version": "3.1.2",
         "releaseUrl": "https://github.com/julxxy/xxl-job-r3/releases/tag/v3.1.2"
       },
       "description": [
@@ -19,12 +19,12 @@
     {
       "frontend": {
         "name": "xxl-job-panel-r3",
-        "version": "v1.0.3",
+        "version": "1.0.3",
         "releaseUrl": "https://github.com/julxxy/xxl-job-panel-r3/releases/tag/v1.0.3"
       },
       "backend": {
         "name": "xxl-job-r3",
-        "version": "v3.1.2",
+        "version": "3.1.2",
         "releaseUrl": "https://github.com/julxxy/xxl-job-r3/releases/tag/v3.1.2"
       },
       "description": [
@@ -32,6 +32,24 @@
         "Improved LDAP login button styling",
         "Logo redirects to GitHub",
         "Upgraded dependencies"
+      ],
+      "date": "2025-06-28"
+    },
+    {
+      "frontend": {
+        "name": "xxl-job-panel-r3",
+        "version": "1.0.4",
+        "releaseUrl": "https://github.com/julxxy/xxl-job-panel-r3/releases/tag/v1.0.4"
+      },
+      "backend": {
+        "name": "xxl-job-r3",
+        "version": "3.1.2.x",
+        "releaseUrl": "https://github.com/julxxy/xxl-job-r3/releases/tag/v3.1.2"
+      },
+      "description": [
+        "Upgraded dependencies",
+        "Fixed editor template code is blank when creating a new job",
+        "Added zoom in/out 'Code Editor' when creating a new job or editing an existing job"
       ],
       "date": "2025-06-28"
     }
