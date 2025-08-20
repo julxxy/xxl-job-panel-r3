@@ -24,7 +24,7 @@ fi
 # --- 配置信息 ---
 IMAGE_NAME="xxl-job-panel-r3"
 DOCKER_USERNAME="julxxy"
-DEFAULT_VERSION="1.0.3.1"
+DEFAULT_VERSION="1.0.4"
 BUILDER_NAME="multiarch-builder"
 DOCKERFILE_PATH="./Dockerfile"
 SUPPORTED_PLATFORMS="linux/amd64,linux/arm64"
