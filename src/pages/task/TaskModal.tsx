@@ -126,6 +126,7 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
       case 'create': {
         if (isDebugEnable) log.debug('新建任务: ', action, data)
         isFirstScheduleTypeChange.current = true
+        isFirstGlueTypeChange.current = false
         form.resetFields()
         form.setFieldsValue({
           jobGroup: actualJobGroupOptions[0]?.value ?? undefined,
@@ -296,12 +297,12 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
 
   useEffect(() => {
     if (glueType && GlueTypeConfig[glueType]?.isScript) {
+      // 首次加载时，根据 isFirstGlueTypeChange 的值判断是否覆盖
       if (isFirstGlueTypeChange.current) {
-        // 第一次渲染，不覆盖，保留原内容
         isFirstGlueTypeChange.current = false
         return
       }
-      // 用户主动切换 glueType，才用模板内容覆盖
+      // 对于新建模式，或非首次切换，使用模板内容覆盖
       const code = glueTemplates[glueType] || ''
       setEditorCode(code)
       form.setFieldValue('glueSource', code)
@@ -491,36 +492,40 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
                       rules={[{ required: true, message: '请输入脚本内容' }]}
                     >
                       <div className="border rounded-md overflow-hidden dark:border-zinc-800">
-                        {/* 历史版本按钮 */}
-                        {!['create', 'clone'].includes(action) && (
-                          <div className="flex items-center justify-between">
-                            <span>
-                              {isGlueSourceChanged && <span className="text-yellow-500 ml-2">脚本已修改</span>}
-                            </span>
-                            <div className="flex items-center">
-                              <IconTooltipButton
-                                size="sm"
-                                tooltip="放大"
-                                variant="ghost"
-                                icon={<ZoomIn />}
-                                onClick={() => setEditorHeight(editorHeight + 40)}
-                                disabled={editorHeight >= 600}
-                              />
-                              <IconTooltipButton
-                                size="sm"
-                                tooltip="缩小"
-                                variant="ghost"
-                                icon={<ZoomOut />}
-                                onClick={() => setEditorHeight(editorHeight - 40)}
-                                disabled={editorHeight <= 100}
-                              />
-                              <IconTooltipButton
-                                size="sm"
-                                tooltip="恢复默认高度"
-                                variant="ghost"
-                                icon={<RefreshCcw />}
-                                onClick={() => setEditorHeight(editorDefaultHeight)}
-                              />
+                        <div className="flex items-center justify-between">
+                          <span>
+                            {/* 仅在编辑模式下显示“脚本已修改” */}
+                            {!['create', 'clone'].includes(action) && isGlueSourceChanged && (
+                              <span className="text-yellow-500 ml-2">脚本已修改</span>
+                            )}
+                          </span>
+                          <div className="flex items-center">
+                            {/* 编辑器通用控制按钮 */}
+                            <IconTooltipButton
+                              size="sm"
+                              tooltip="放大"
+                              variant="ghost"
+                              icon={<ZoomIn />}
+                              onClick={() => setEditorHeight(editorHeight + 40)}
+                              disabled={editorHeight >= 600}
+                            />
+                            <IconTooltipButton
+                              size="sm"
+                              tooltip="缩小"
+                              variant="ghost"
+                              icon={<ZoomOut />}
+                              onClick={() => setEditorHeight(editorHeight - 40)}
+                              disabled={editorHeight <= 200}
+                            />
+                            <IconTooltipButton
+                              size="sm"
+                              tooltip="恢复默认高度"
+                              variant="ghost"
+                              icon={<RefreshCcw />}
+                              onClick={() => setEditorHeight(editorDefaultHeight)}
+                            />
+                            {/* 仅在编辑模式下显示“历史版本”按钮 */}
+                            {!['create', 'clone'].includes(action) && (
                               <IconTooltipButton
                                 size="sm"
                                 tooltip="历史版本"
@@ -528,9 +533,9 @@ export default function TaskModal({ parentRef, onRefresh }: IModalProps) {
                                 icon={<HistoryIcon />}
                                 onClick={handleOpenHistory}
                               />
-                            </div>
+                            )}
                           </div>
-                        )}
+                        </div>
                         <Editor
                           height={editorHeight}
                           language={glueLangMap[glueType] || 'text'}
