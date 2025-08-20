@@ -47,11 +47,11 @@
         "releaseUrl": "https://github.com/julxxy/xxl-job-r3/releases/tag/v3.1.2"
       },
       "description": [
-        "Upgraded dependencies",
-        "Fixed editor template code is blank when creating a new job",
-        "Added zoom in/out 'Code Editor' when creating a new job or editing an existing job"
+        "Upgraded project dependencies to latest versions for improved performance and security",
+        "Fixed issue where code editor template was blank when creating new jobs",
+        "Added zoom functionality to code editor for enhanced coding experience when creating or editing jobs"
       ],
-      "date": "2025-06-28"
+      "date": "2025-08-20"
     }
   ]
 }
